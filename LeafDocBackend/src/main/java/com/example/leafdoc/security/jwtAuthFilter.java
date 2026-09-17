@@ -1,5 +1,6 @@
-package com.example.leafdoc.confiurations;
+package com.example.leafdoc.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 public class jwtAuthFilter extends OncePerRequestFilter {
+
+    private final jwtService jwtService;
+    public jwtAuthFilter(jwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
     @Override
     protected void doFilterInternal(
@@ -26,22 +32,35 @@ public class jwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        // here validate the token jwtService.isTokenValid(token) |create auth service
+        /// here validate the token jwtService.isTokenValid(token) |create auth service
 
-        UsernamePasswordAuthenticationToken authentication = null
-                //getUserAuthenticationToken(role, email, userId);
 
-        SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
+        try{
+            if(jwtService.isTokenValid(token)){
+                //String username = jwtService.getUsernameFromToken(token);
+                /// like this take all user info from jwtService
 
+            AuthenticatedUserPrincipal principal = new AuthenticatedUserPrincipal();
+                ///create principal with retreved info ,
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(principal,null);
+            SecurityContextHolder
+                    .getContext()
+                    .setAuthentication(authentication);
+            }
+
+        }catch (JwtException | IllegalArgumentException e){
+                SecurityContextHolder.clearContext();
+        }
+        filterChain.doFilter(request, response);
     }
 
-    UsernamePasswordAuthenticationToken getAuthentication() {
-        return (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+//    UsernamePasswordAuthenticationToken getAuthentication() {
+//        return (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+//
+//        //UsernamePasswordAuthenticationToken authentication;
+//        //authentication.setDetails(userId);
+//        //return authentication;
+//    }
 
-        UsernamePasswordAuthenticationToken authentication;
-        //authentication.setDetails(userId);
-        return authentication;
-    }
 }
