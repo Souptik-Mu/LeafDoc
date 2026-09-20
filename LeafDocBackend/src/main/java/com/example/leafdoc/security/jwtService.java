@@ -1,5 +1,6 @@
 package com.example.leafdoc.security;
 
+import com.example.leafdoc.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 public class jwtService {
 
@@ -28,17 +30,16 @@ public class jwtService {
     }
 
 
-    /// jwt contains : userId(as subject),
+    /// jwt contains : userId(as subject), role, iat(issued at), exp
     public String generateToken(
-            Long uId, String email
-            //todo: later take a login object or user
+            User user
     ){
         Instant now = Instant.now();
 
         return Jwts.builder()
-                .subject(email)  // user.getemail | to extract> extractAllClaims(token).getSubject();
-                .claim("userId", uId) //| to extract> return extractAllClaims(token).get("userId", Long.class);
-                //.claim("role", user.getRole())
+                .subject(user.getId())  // | to extract> extractAllClaims(token).getSubject();
+                //.claim("userId", uId) //| to extract> return extractAllClaims(token).get("userId", Long.class);
+                .claim("role", user.getRole())
                 .issuedAt(Date.from(now))
                 .expiration(
                         Date.from(
@@ -63,7 +64,18 @@ public class jwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-    public void extractUserName(String token){}
-    public void extractPassword(String token){}
+    ///  take user info from db, return the principal.
+    
 
+    public UUID getUserIdFromToken(String token) {
+        Claims claims = extractAllClaims(token);
+        return (UUID) claims.get("userId");
+    }
+
+    public String getEmailFromToken(String token) {
+    }
+
+    public String getRoleFromToken(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
 }

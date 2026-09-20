@@ -3,13 +3,18 @@ package com.example.leafdoc.security;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
 
 public class jwtAuthFilter extends OncePerRequestFilter {
 
@@ -25,26 +30,23 @@ public class jwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || ! authHeader.startsWith("Bearer ")) {
+        String token = extractTokenFromCookie(request);
+
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7);
-        /// here validate the token jwtService.isTokenValid(token) |create auth service
-
-
         try{
             if(jwtService.isTokenValid(token)){
-                //String username = jwtService.getUsernameFromToken(token);
-                /// like this take all user info from jwtService
+                UUID userId = jwtService.getUserIdFromToken(token);
+                String role = jwtService.getRoleFromToken(token);
+                //String email = jwtService.getEmailFromToken(token);
 
-            AuthenticatedUserPrincipal principal = new AuthenticatedUserPrincipal();
-                ///create principal with retreved info ,
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(principal,null);
-            SecurityContextHolder
+                UsernamePasswordAuthenticationToken authentication =
+                        getUsernamePasswordAuthenticationToken(userId, role);
+
+                SecurityContextHolder
                     .getContext()
                     .setAuthentication(authentication);
             }
@@ -55,12 +57,33 @@ public class jwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-//    UsernamePasswordAuthenticationToken getAuthentication() {
-//        return (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-//
-//        //UsernamePasswordAuthenticationToken authentication;
-//        //authentication.setDetails(userId);
-//        //return authentication;
-//    }
+    private static @NonNull UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(UUID userId, String role) {
+        AuthenticatedUserPrincipal principal =
+                new AuthenticatedUserPrincipal(userId, role);
 
+        SimpleGrantedAuthority authority =
+                new SimpleGrantedAuthority(
+                        "ROLE_" + role
+                );
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        principal,
+                        null,
+                        List.of(authority)
+                );
+        return authentication;
+    }
+
+    private String extractTokenFromCookie(HttpServletRequest request) {
+
+        if(request.getCookies() == null)
+            return null;
+
+        for (Cookie cookie : request.getCookies())
+            if (cookie.getName().equals("accessToken"))
+                return cookie.getValue();
+
+        return null;
+    }
 }
