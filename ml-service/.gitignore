@@ -1,0 +1,114 @@
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+.Python
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# =========================
+# Virtual environments
+# =========================
+
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Environment / secrets
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+# Testing / coverage
+# =========================
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# =========================
+# Type checkers / linters
+# =========================
+
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# =========================
+# ML artifacts
+# =========================
+
+# Trained models
+models/
+*.pkl
+*.pickle
+*.joblib
+*.onnx
+*.pt
+*.pth
+*.h5
+*.keras
+*.safetensors
+
+# Experiment / training outputs
+checkpoints/
+runs/
+wandb/
+mlruns/
+
+# =========================
+# Data
+# =========================
+
+# Usually don't commit datasets
+data/
+datasets/
+
+# Generated ML output
+outputs/
+artifacts/
+logs/
+
+# =========================
+# IDE / editors
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+
+*.log
+
+# =========================
+# Local configuration
+# =========================
+
+*.local
