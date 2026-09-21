@@ -44,13 +44,15 @@ public class AuthController {
     public void register(@RequestBody LoginRequest temp) {
 
     }
-//    @GetMapping("/me")
-//    public UserResponse me(
-//            @AuthenticationPrincipal
-//            AuthenticatedUserPrincipal user
-//    ) {
-//        return userService.getUser(user.userId());
-//    }
+    @GetMapping("/me")
+    public ResponseEntity<?> me(
+            @AuthenticationPrincipal
+            AuthenticatedUserPrincipal user
+    ) {
+        //return userService.getUser(user.userId());
+        return ResponseEntity.ok()
+                .body(user);
+    }
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal

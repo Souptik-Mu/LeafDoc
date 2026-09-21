@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 //@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
-    // get back uuid(auto genarated)
-    ///id (PK), name, email (unique), password_hash, role, created_at
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +44,5 @@ public class User {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
 }
-// have ROLE enum
+
