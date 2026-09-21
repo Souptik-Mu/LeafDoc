@@ -1,10 +1,8 @@
 package com.example.leafdoc.security;
 
-import java.util.UUID;
-
 public record AuthenticatedUserPrincipal(
         //user id, email, role?
-        UUID userId,
+        Long userId,
         String role
 ) {
 }
