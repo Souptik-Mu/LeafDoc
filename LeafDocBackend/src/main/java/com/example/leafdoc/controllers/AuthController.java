@@ -25,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
+    public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest req) {
 
         String jwt = authService.login(req);
         ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
@@ -39,8 +39,6 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(Map.of("message", "Login successful"));
-
-        //ResponseEntity<Map<String, String>>
     }
 
     @PostMapping("/register")

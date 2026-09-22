@@ -5,6 +5,7 @@ import com.example.leafdoc.DTO.LoginResponse;
 import com.example.leafdoc.DTO.RegisterRequest;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.Role;
+import com.example.leafdoc.exceptions.InvalidCredentialsException;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
 import jakarta.validation.Valid;
@@ -25,6 +26,10 @@ public class AuthService {
 
     //register
     public String register(RegisterRequest request) {
+
+        if (userRepo.existsByEmail(request.email()))
+            throw new InvalidCredentialsException(); // todo: 409 - implement later
+
         String passwordHash =
                 passwordEncoder.encode(request.password());
 
@@ -47,15 +52,15 @@ public class AuthService {
         /// find user by email
         User user = userRepo
                 .findByEmail(request.email())
-                .orElseThrow(InvalidCredentialsException::new); // custom exception
+                .orElseThrow(InvalidCredentialsException::new);
 
         /// check password
-        if( !passwordEncoder.matches( request.password(), user.getPasswordHash() ) ) {}
+        if( !passwordEncoder.matches( request.password(), user.getPasswordHash() ) )
             throw new InvalidCredentialsException();
 
         /// genarate token
         /// send back the token
-        return jwtService.generateToken(user);;
+        return jwtService.generateToken(user);
     }
     //refresh
     //verifyOTP
