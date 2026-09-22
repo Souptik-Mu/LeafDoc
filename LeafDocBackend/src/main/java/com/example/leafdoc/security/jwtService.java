@@ -4,9 +4,11 @@ import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
+@Service
 public class jwtService {
 
     private final SecretKey secretKey;
@@ -24,7 +27,8 @@ public class jwtService {
             @Value("${app.jwt.expiration}") long expiration
     ) {
         secretKey = Keys.hmacShaKeyFor(
-                key.getBytes(StandardCharsets.UTF_8)
+                //key.getBytes(StandardCharsets.UTF_8)
+                Decoders.BASE64.decode(key)
         );
 
         accessTokenExpiry = expiration;

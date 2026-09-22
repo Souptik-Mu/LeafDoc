@@ -16,11 +16,11 @@ public class MlService {
 
     public MlService(
             RestClient.Builder builder,
-            @Value("${ml.service.url}") String mlUrl,
-            @Value("${ml.service.key}") String serviceKey
+            @Value("${app.ml.service.url}") String mlUrl,
+            @Value("${app.ml.service.key}") String serviceKey
     ) {
         this.restClient = builder
-                .baseUrl("http://localhost:8000")
+                .baseUrl(mlUrl)
                 .build();
 
         this.serviceKey = serviceKey;

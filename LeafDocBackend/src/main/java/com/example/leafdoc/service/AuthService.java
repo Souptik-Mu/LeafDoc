@@ -10,8 +10,10 @@ import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
 import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+@Service
 public class AuthService {
 
     private final UserRepository userRepo;
