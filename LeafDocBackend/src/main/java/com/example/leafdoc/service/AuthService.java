@@ -2,11 +2,14 @@ package com.example.leafdoc.service;
 
 import com.example.leafdoc.DTO.LoginRequest;
 import com.example.leafdoc.DTO.LoginResponse;
+import com.example.leafdoc.DTO.RegisterRequest;
 import com.example.leafdoc.entity.User;
+import com.example.leafdoc.enums.Role;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
 import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.RequestBody;
 
 public class AuthService {
 
@@ -21,6 +24,23 @@ public class AuthService {
     }
 
     //register
+    public String register(RegisterRequest request) {
+        String passwordHash =
+                passwordEncoder.encode(request.password());
+
+        User user = new User();
+
+        user.setName(request.name());
+        user.setEmail(request.email());
+        user.setPasswordHash(
+                passwordEncoder.encode(request.password())
+        );
+        user.setRole(Role.USER);
+
+        User savedUser = userRepo.save(user);
+        // need jwt here cause im doing auto log in.
+        return jwtService.generateToken(savedUser);
+    }
     
     //login
     public String login( @Valid LoginRequest request) {
@@ -30,14 +50,12 @@ public class AuthService {
                 .orElseThrow(InvalidCredentialsException::new); // custom exception
 
         /// check password
-        if( !passwordEncoder.matches( request.password(), user.getPassword() ))
+        if( !passwordEncoder.matches( request.password(), user.getPasswordHash() ) ) {}
             throw new InvalidCredentialsException();
 
         /// genarate token
-
-        String accessToken = jwtService.generateToken(user); // genarate token
         /// send back the token
-        return null;
+        return jwtService.generateToken(user);;
     }
     //refresh
     //verifyOTP

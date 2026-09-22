@@ -1,9 +1,11 @@
 package com.example.leafdoc.security;
 
+import com.example.leafdoc.enums.Role;
+
 public record AuthenticatedUserPrincipal(
         //user id, email, role?
         Long userId,
-        String role
+        Role role
 ) {
 }
 

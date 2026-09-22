@@ -1,5 +1,6 @@
 package com.example.leafdoc.security;
 
+import com.example.leafdoc.enums.Role;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 public class jwtAuthFilter extends OncePerRequestFilter {
 
@@ -25,9 +25,9 @@ public class jwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
         String token = extractTokenFromCookie(request);
@@ -39,9 +39,8 @@ public class jwtAuthFilter extends OncePerRequestFilter {
 
         try{
             if(jwtService.isTokenValid(token)){
-                UUID userId = jwtService.getUserIdFromToken(token);
-                String role = jwtService.getRoleFromToken(token);
-                //String email = jwtService.getEmailFromToken(token);
+                Long userId = jwtService.getUserIdFromToken(token);
+                Role role = jwtService.getRoleFromToken(token);
 
                 UsernamePasswordAuthenticationToken authentication =
                         getUsernamePasswordAuthenticationToken(userId, role);
@@ -57,22 +56,20 @@ public class jwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private static @NonNull UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(UUID userId, String role) {
+    private static @NonNull UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(Long userId, Role role) {
         AuthenticatedUserPrincipal principal =
                 new AuthenticatedUserPrincipal(userId, role);
 
         SimpleGrantedAuthority authority =
                 new SimpleGrantedAuthority(
-                        "ROLE_" + role
+                        "ROLE_" + role.name()
                 );
 
-        UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
-                        principal,
-                        null,
-                        List.of(authority)
-                );
-        return authentication;
+        return new UsernamePasswordAuthenticationToken(
+                principal,
+                null,
+                List.of(authority)
+        );
     }
 
     private String extractTokenFromCookie(HttpServletRequest request) {
