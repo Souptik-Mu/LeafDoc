@@ -53,6 +53,7 @@ public class jwtAuthFilter extends OncePerRequestFilter {
             }
 
         }catch (JwtException | IllegalArgumentException e){
+            System.out.println("JWT Validation Failed: " + e.getMessage());
                 SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
