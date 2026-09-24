@@ -1,11 +1,14 @@
 package com.example.leafdoc.security;
 
 import com.example.leafdoc.entity.User;
+import com.example.leafdoc.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
+@Service
 public class jwtService {
 
     private final SecretKey secretKey;
@@ -23,7 +27,8 @@ public class jwtService {
             @Value("${app.jwt.expiration}") long expiration
     ) {
         secretKey = Keys.hmacShaKeyFor(
-                key.getBytes(StandardCharsets.UTF_8)
+                //key.getBytes(StandardCharsets.UTF_8)
+                Decoders.BASE64.decode(key)
         );
 
         accessTokenExpiry = expiration;
@@ -36,10 +41,10 @@ public class jwtService {
     ){
         Instant now = Instant.now();
 
-        return Jwts.builder()
-                .subject(user.getId())  // | to extract> extractAllClaims(token).getSubject();
                 //.claim("userId", uId) //| to extract> return extractAllClaims(token).get("userId", Long.class);
-                .claim("role", user.getRole())
+        return Jwts.builder()
+                .subject(user.getId().toString())  // | to extract> extractAllClaims(token).getSubject();
+                .claim("role", user.getRole().name())
                 .issuedAt(Date.from(now))
                 .expiration(
                         Date.from(
@@ -67,15 +72,16 @@ public class jwtService {
     ///  take user info from db, return the principal.
     
 
-    public UUID getUserIdFromToken(String token) {
+    public Long getUserIdFromToken(String token) {
         Claims claims = extractAllClaims(token);
-        return (UUID) claims.get("userId");
+        return Long.parseLong(claims.getSubject());
     }
 
-    public String getEmailFromToken(String token) {
-    }
+    public Role getRoleFromToken(String token) {
 
-    public String getRoleFromToken(String token) {
-        return extractAllClaims(token).get("role", String.class);
+        String role_str = extractAllClaims(token).get("role", String.class);
+        if(role_str != null)
+            return Role.valueOf(role_str);
+        return null;
     }
 }

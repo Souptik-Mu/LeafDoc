@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor()
 //@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
     // get back uuid(auto genarated)
@@ -21,7 +21,7 @@ public class User {
     Long id;
 
     @Column(name="user_name", nullable = false)
-    String userName;
+    String name;
 
     @Column(nullable = false,unique = true)
     String email;
@@ -36,7 +36,7 @@ public class User {
     LocalDateTime createdAt;
 
     public User(String userName, String email, String passwordHash, Role role) {
-        this.userName = userName;
+        this.name = userName;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role != null ? role : Role.GUEST;
