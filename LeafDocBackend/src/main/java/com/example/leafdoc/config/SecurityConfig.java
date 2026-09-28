@@ -1,12 +1,10 @@
-package com.example.leafdoc.confiurations;
+package com.example.leafdoc.config;
 
 import com.example.leafdoc.security.jwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -42,8 +40,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/register",
-                                "/auth/login"
-//                                "/api/auth/verify-otp",
+                                "/auth/login",
+                                "/auth/verify-email"
 //                                "/api/auth/forgot-password",
 //                                "/api/auth/reset-password"
                         ).permitAll().anyRequest().authenticated()

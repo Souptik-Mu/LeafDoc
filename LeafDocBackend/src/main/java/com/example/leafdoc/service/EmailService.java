@@ -2,39 +2,28 @@ package com.example.leafdoc.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine; //thymleaf
 
-    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
-        this.mailSender = mailSender;
-        this.templateEngine =  templateEngine;
-    }
+//    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+//        this.mailSender = mailSender;
+//        this.templateEngine =  templateEngine;
+//        /*todo: i can just do @RequiredArgsConstructor for auto constructor injection */
+//    }
 
-    private void tutorial() throws MessagingException {
-        new SimpleMailMessage();  // only simple text emails.
-
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper =
-                new MimeMessageHelper(message, true);
-        // it throws exception
-        // with thymleaf ir can read html emails from resources folder and send them.
-
-        ///////////////////
-        //todo: Use spring events
-        /// direct call of email service, the mail services may face delay because of smtp.
-
-
-    }
-
+    @Async("emailExecutor")
     public void sendPasswordResetEmail(String to){
         try {
 
@@ -56,6 +45,7 @@ public class EmailService {
 
         }
     }
+    @Async("emailExecutor")
     public void sendDummyEmail(String to){
         Context ctx = new Context();
         ctx.setVariable("name", "Random value name");

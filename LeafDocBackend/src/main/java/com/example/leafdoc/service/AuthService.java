@@ -1,54 +1,76 @@
 package com.example.leafdoc.service;
 
-import com.example.leafdoc.DTO.LoginRequest;
-import com.example.leafdoc.DTO.LoginResponse;
-import com.example.leafdoc.DTO.RegisterRequest;
+import com.example.leafdoc.DTO.auth.LoginRequest;
+import com.example.leafdoc.DTO.auth.RegisterRequest;
+import com.example.leafdoc.entity.PendingRegistration;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.Role;
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
+import com.example.leafdoc.repository.PendingRegistrationRepo;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepo;
+    private final PendingRegistrationRepo pendingRepo;
     private final PasswordEncoder passwordEncoder;
     private final jwtService jwtService;
+    private final EmailService emailService;
 
-    public AuthService(UserRepository userRepo, PasswordEncoder passwordEncoder, jwtService jwtService) {
-        this.userRepo = userRepo;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-    }
 
     //register
-    public String register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
 
         if (userRepo.existsByEmail(request.email()))
             throw new InvalidCredentialsException(); // todo: 409 - implement later
 
-        String passwordHash =
-                passwordEncoder.encode(request.password());
+        if (pendingRepo.existsByEmail(request.email()))
+            throw new InvalidCredentialsException();
 
-        User user = new User();
+        //* generate random token
+        //  hash token
+        //  create and save a pending Registration
+        // send email (mail service) with the link containing token
+        //!-----------------------------------------------------------
+        // ok clicking that link another endpoint triggers(somewhere that's not here) [verify-user]
 
-        user.setName(request.name());
-        user.setEmail(request.email());
-        user.setPasswordHash(
-                passwordEncoder.encode(request.password())
-        );
-        user.setRole(Role.USER);
+    }
+    //verify
+    public String verifyToken(String token) {
+        //*     here token hashed, and corosponding pendin registration found.
+        //      after checking expiry, and other things.
+        //      create user aggainst that, and consume the pending registration
+        //      genarate jwt now and return from there (trigger a redirect to main page)
+
+
+
+
+        {//Creation of user
+            String passwordHash =
+                    passwordEncoder.encode(request.password());
+
+            User user = new User();
+
+            user.setName(request.name());
+            user.setEmail(request.email());
+            user.setPasswordHash(
+                    passwordEncoder.encode(request.password())
+            );
+            user.setRole(Role.USER);
+        }
 
         User savedUser = userRepo.save(user);
-        // need jwt here cause im doing auto log in.
+        /// need jwt here cause I'm doing auto log in. (return jwt for auto login)
         return jwtService.generateToken(savedUser);
     }
-    
+
     //login
     public String login( @Valid LoginRequest request) {
         /// find user by email
@@ -64,7 +86,7 @@ public class AuthService {
         /// send back the token
         return jwtService.generateToken(user);
     }
-    //refresh
+
     //verifyOTP
     //forgotPass
     //resetPass

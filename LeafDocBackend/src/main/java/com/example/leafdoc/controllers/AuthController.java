@@ -1,7 +1,7 @@
 package com.example.leafdoc.controllers;
 
-import com.example.leafdoc.DTO.LoginRequest;
-import com.example.leafdoc.DTO.RegisterRequest;
+import com.example.leafdoc.DTO.auth.LoginRequest;
+import com.example.leafdoc.DTO.auth.RegisterRequest;
 import com.example.leafdoc.security.AuthenticatedUserPrincipal;
 import com.example.leafdoc.service.AuthService;
 import jakarta.validation.Valid;
@@ -45,7 +45,14 @@ public class AuthController {
     public ResponseEntity<Void> register(
             @Valid @RequestBody RegisterRequest request) {
 
-        String jwt = authService.register(request);
+        authService.register(request);
+        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Void> verify(@PathVariable String token ) {
+
+        String jwt = authService.verifyToken(token);
 
         ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
                 .httpOnly(true)

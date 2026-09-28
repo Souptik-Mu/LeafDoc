@@ -18,22 +18,22 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name="user_name", nullable = false)
-    String name;
+    private String name;
 
     @Column(nullable = false,unique = true)
-    String email;
+    private String email;
     @Column(name="password_hash", nullable = false)
-    String passwordHash;
+    private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     @Column(name="created_at", nullable = false, updatable = false)
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     public User(String userName, String email, String passwordHash, Role role) {
         this.name = userName;

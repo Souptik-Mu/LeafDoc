@@ -1,4 +1,4 @@
-package com.example.leafdoc.confiurations;
+package com.example.leafdoc.config;
 
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
 import org.springframework.http.HttpStatus;
