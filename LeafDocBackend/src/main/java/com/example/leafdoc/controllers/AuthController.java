@@ -67,6 +67,30 @@ public class AuthController {
                 .build();
     }
 
+    @PostMapping("/resend-verification")  //add it in security config
+    public ResponseEntity<?> resend( @Valid @RequestBody RegisterRequest request) {
+        //* NICE TO HAVE FEATURE
+        // re-sends the current registration data.
+        // checked if the email is present in pendingUsers
+        // then new token generated, updated the time and token(hash) in db
+        // resend the email again with new token
+        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPass(@PathVariable String email ) {
+        //Request a reset email
+        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPass( ) {
+        // takes reset token (sent via email) and the new password
+       // Set the new password using the token
+        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+
     @GetMapping("/me")
     public ResponseEntity<?> me(
             @AuthenticationPrincipal
@@ -76,6 +100,7 @@ public class AuthController {
         return ResponseEntity.ok()
                 .body(user);
     }
+
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal

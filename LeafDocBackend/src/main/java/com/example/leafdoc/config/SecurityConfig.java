@@ -41,9 +41,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/register",
                                 "/auth/login",
-                                "/auth/verify-email"
-//                                "/api/auth/forgot-password",
-//                                "/api/auth/reset-password"
+                                "/auth/verify-email",
+                                "/api/auth/forgot-password",
+                                "/api/auth/reset-password"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(
