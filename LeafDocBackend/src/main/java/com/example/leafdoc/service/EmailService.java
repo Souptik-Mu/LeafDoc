@@ -24,6 +24,27 @@ public class EmailService {
 //    }
 
     @Async("emailExecutor")
+    public void sendVarificationEmail(String to, String user, String link) {
+        Context ctx = new Context();
+        ctx.setVariable("name", user);
+        ctx.setVariable("verificationLink", link);
+
+        String html = templateEngine.process("emails/verification-email", ctx);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject("Verify Email");
+            helper.setText(html, true);
+
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Async("emailExecutor")
     public void sendPasswordResetEmail(String to){
         try {
 

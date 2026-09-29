@@ -11,8 +11,18 @@ import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.Base64;
+import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +34,29 @@ public class AuthService {
     private final jwtService jwtService;
     private final EmailService emailService;
 
+    @Value("${app.cors.allowed-origin}")
+    private String frontendUrl;
+
+    private String generateRawToken() {
+        byte[] bytes = new byte[32];
+        new SecureRandom().nextBytes(bytes);
+        return Base64.getUrlEncoder()
+                .withoutPadding()
+                .encodeToString(bytes);
+    }
+
+    private String hashToken(String rawToken) {
+        try {
+            MessageDigest digest =
+                    MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(
+                    rawToken.getBytes(StandardCharsets.UTF_8)
+            );
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     //register
     public void register(RegisterRequest request) {
@@ -35,38 +68,51 @@ public class AuthService {
             throw new InvalidCredentialsException();
 
         //* generate random token
-        //  hash token
-        //  create and save a pending Registration
-        // send email (mail service) with the link containing token
-        //!-----------------------------------------------------------
-        // ok clicking that link another endpoint triggers(somewhere that's not here) [verify-user]
+        String rawToken = generateRawToken();
 
+        LocalDateTime now = LocalDateTime.now();
+        PendingRegistration pending = new PendingRegistration();
+
+        pending.setEmail(request.email());
+        pending.setName(request.name());
+        pending.setRole(request.role());
+        pending.setPasswordHash(passwordEncoder.encode(request.password()));
+
+        pending.setVerification_token_hash( hashToken(rawToken) );
+        pending.setCreated_at(now);
+        pending.setExpires_at(now.plusMinutes(15));
+
+        pendingRepo.save(pending);
+        String link = UriComponentsBuilder
+                .fromUriString(frontendUrl)
+                .path("/verify")
+                .queryParam("token", rawToken)
+                .build()
+                .toUriString();
+
+        emailService.sendVarificationEmail(request.email(), request.name(), link);
     }
+
     //verify
     public String verifyToken(String token) {
-        //*     here token hashed, and corosponding pendin registration found.
-        //      after checking expiry, and other things.
-        //      create user aggainst that, and consume the pending registration
-        //      genarate jwt now and return from there (trigger a redirect to main page)
 
+        PendingRegistration pending = pendingRepo.findByVerificationTokenHash(hashToken(token))
+                .orElseThrow(InvalidCredentialsException::new);
 
-
-
-        {//Creation of user
-            String passwordHash =
-                    passwordEncoder.encode(request.password());
-
-            User user = new User();
-
-            user.setName(request.name());
-            user.setEmail(request.email());
-            user.setPasswordHash(
-                    passwordEncoder.encode(request.password())
-            );
-            user.setRole(Role.USER);
+        if (!pending.getExpires_at().isAfter(LocalDateTime.now())) {
+            throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
+        User user = new User();
+
+        user.setName(pending.getName());
+        user.setEmail(pending.getEmail());
+        user.setPasswordHash( pending.getPasswordHash() );
+        user.setRole(pending.getRole());
+
         User savedUser = userRepo.save(user);
+        pendingRepo.delete(pending);
+
         /// need jwt here cause I'm doing auto log in. (return jwt for auto login)
         return jwtService.generateToken(savedUser);
     }

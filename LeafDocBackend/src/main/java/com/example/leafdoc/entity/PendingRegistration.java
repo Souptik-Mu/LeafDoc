@@ -2,11 +2,17 @@ package com.example.leafdoc.entity;
 
 import com.example.leafdoc.enums.Role;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name= "pending_registration")
+@Getter
+@Setter
+@NoArgsConstructor
 public class PendingRegistration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
