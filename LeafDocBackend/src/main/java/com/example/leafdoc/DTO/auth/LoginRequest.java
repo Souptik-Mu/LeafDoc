@@ -1,4 +1,4 @@
-package com.example.leafdoc.DTO;
+package com.example.leafdoc.DTO.auth;
 
 public record LoginRequest(
         String email,
