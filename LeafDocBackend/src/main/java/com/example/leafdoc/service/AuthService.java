@@ -1,20 +1,21 @@
 package com.example.leafdoc.service;
 
-import com.example.leafdoc.DTO.auth.LoginRequest;
-import com.example.leafdoc.DTO.auth.RegisterRequest;
-import com.example.leafdoc.entity.PendingRegistration;
-import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.Role;
+import com.example.leafdoc.util.PendingRegistrationPayload;
+import com.example.leafdoc.DTO.auth.RegisterRequest;
+import com.example.leafdoc.entity.VerificationToken;
+import com.example.leafdoc.entity.User;
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
-import com.example.leafdoc.repository.PendingRegistrationRepo;
+import com.example.leafdoc.repository.VerificationTokenRepository;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -29,10 +30,11 @@ import java.util.HexFormat;
 public class AuthService {
 
     private final UserRepository userRepo;
-    private final PendingRegistrationRepo pendingRepo;
+    private final VerificationTokenRepository pendingRepo;
     private final PasswordEncoder passwordEncoder;
     private final jwtService jwtService;
     private final EmailService emailService;
+    private final ObjectMapper objectMapper;
 
     @Value("${app.cors.allowed-origin}")
     private String frontendUrl;
@@ -59,30 +61,39 @@ public class AuthService {
     }
 
     //register
-    public void register(RegisterRequest request) {
+    public void register(String name,
+                         String email,
+                         String password,
+                         Role role) {
 
-        if (userRepo.existsByEmail(request.email()))
-            throw new InvalidCredentialsException(); // todo: 409 - implement later
+        if (userRepo.existsByEmail(email))
+            throw new InvalidCredentialsException(); // todo: 409 Conflict- implement later
 
-        if (pendingRepo.existsByEmail(request.email()))
+        if (pendingRepo.existsByEmail(email))
             throw new InvalidCredentialsException();
 
         //* generate random token
         String rawToken = generateRawToken();
 
         LocalDateTime now = LocalDateTime.now();
-        PendingRegistration pending = new PendingRegistration();
+        VerificationToken token = new VerificationToken();
 
-        pending.setEmail(request.email());
-        pending.setName(request.name());
-        pending.setRole(request.role());
-        pending.setPasswordHash(passwordEncoder.encode(request.password()));
+        PendingRegistrationPayload payload = new PendingRegistrationPayload(
+                name,
+                email,
+                passwordEncoder.encode(password),
+                role
+        );
 
-        pending.setVerification_token_hash( hashToken(rawToken) );
-        pending.setCreated_at(now);
-        pending.setExpires_at(now.plusMinutes(15));
+        token.setVerification_token_hash( hashToken(rawToken) );
+        token.setCreated_at(now);
+        token.setExpires_at(now.plusMinutes(15));
+        token.setSerialisedData(
+                objectMapper.writeValueAsString(payload)
+        );
 
-        pendingRepo.save(pending);
+
+        pendingRepo.save(token);
         String link = UriComponentsBuilder
                 .fromUriString(frontendUrl)
                 .path("/verify")
@@ -90,25 +101,30 @@ public class AuthService {
                 .build()
                 .toUriString();
 
-        emailService.sendVarificationEmail(request.email(), request.name(), link);
+        emailService.sendVarificationEmail(email, name, link);
     }
 
     //verify
     public String verifyToken(String token) {
 
-        PendingRegistration pending = pendingRepo.findByVerificationTokenHash(hashToken(token))
+        VerificationToken pending = pendingRepo.findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!pending.getExpires_at().isAfter(LocalDateTime.now())) {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
+        PendingRegistrationPayload payload = objectMapper.readValue(
+                pending.getSerialisedData(),
+                PendingRegistrationPayload.class
+        );
+
         User user = new User();
 
-        user.setName(pending.getName());
-        user.setEmail(pending.getEmail());
-        user.setPasswordHash( pending.getPasswordHash() );
-        user.setRole(pending.getRole());
+        user.setName(payload.name());
+        user.setEmail(payload.email());
+        user.setPasswordHash( payload.passwordHash() );
+        user.setRole(payload.role());
 
         User savedUser = userRepo.save(user);
         pendingRepo.delete(pending);
@@ -118,14 +134,14 @@ public class AuthService {
     }
 
     //login
-    public String login( @Valid LoginRequest request) {
+    public String login( String email, String password) {
         /// find user by email
         User user = userRepo
-                .findByEmail(request.email())
+                .findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);
 
         /// check password
-        if( !passwordEncoder.matches( request.password(), user.getPasswordHash() ) )
+        if( !passwordEncoder.matches( password, user.getPasswordHash() ) )
             throw new InvalidCredentialsException();
 
         /// genarate token
@@ -135,6 +151,25 @@ public class AuthService {
 
     //verifyOTP
     //forgotPass
+    public void forgetPassword(String email){
+        User user = userRepo.findByEmail(email).orElseThrow();
+        //Request a reset email
+
+        // genarates reset token and send (sent via email)
+    }
     //resetPass
+    public boolean resetPassword(String token, String newPassword) {
+        /* request body
+         * {
+         *       token: ...
+         *       newPassword: *****
+         * }
+         * */
+        String json = objectMapper.writeValueAsString(new Object());
+        Object o =  objectMapper.readValue(json, Object.class);
+        //verify the token and set the new passwordeeer
+        // it also takes in the new password for user
+        return false;
+    }
     //logout
 }
