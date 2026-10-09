@@ -2,9 +2,12 @@ package com.example.leafdoc.controllers;
 
 import com.example.leafdoc.DTO.auth.LoginRequest;
 import com.example.leafdoc.DTO.auth.RegisterRequest;
+import com.example.leafdoc.DTO.auth.ResetPassRequest;
 import com.example.leafdoc.security.AuthenticatedUserPrincipal;
 import com.example.leafdoc.service.AuthService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -27,7 +30,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest req) {
 
-        String jwt = authService.login(req);
+        String jwt = authService.login(req.email(), req.password());
+
         ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
                 .httpOnly(true)
                 .secure(false) // true for HTTPS
@@ -45,12 +49,12 @@ public class AuthController {
     public ResponseEntity<Void> register(
             @Valid @RequestBody RegisterRequest request) {
 
-        authService.register(request);
+        authService.register(request.name(), request.email(), request.password(),  request.role());
         return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @PostMapping("/verify-email")
-    public ResponseEntity<Void> verify(@PathVariable String token ) {
+    @GetMapping("/verify-email")
+    public ResponseEntity<Void> verify(@RequestParam String token ) {
 
         String jwt = authService.verifyToken(token);
 
@@ -67,7 +71,7 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/resend-verification")  //add it in security config
+    @PostMapping("/resend-verification")  //add it in security config (later)
     public ResponseEntity<?> resend( @Valid @RequestBody RegisterRequest request) {
         //* NICE TO HAVE FEATURE
         // re-sends the current registration data.
@@ -78,16 +82,20 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPass(@PathVariable String email ) {
-        //Request a reset email
+    public ResponseEntity<Void> forgotPass(
+            @RequestParam
+            @Email(message = "Invalid email format")
+            @NotBlank
+            String email
+    ) {
+        authService.forgetPassword(email);
         return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPass( ) {
-        // takes reset token (sent via email) and the new password
-       // Set the new password using the token
-        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    public ResponseEntity<Void> resetPass(@Valid @RequestBody ResetPassRequest request ) {
+        authService.resetPassword(request.token(), request.newPassword());
+        return  ResponseEntity.status(HttpStatus.OK).build();
     }
 
 
@@ -96,7 +104,6 @@ public class AuthController {
             @AuthenticationPrincipal
             AuthenticatedUserPrincipal user
     ) {
-        //return userService.getUser(user.userId());
         return ResponseEntity.ok()
                 .body(user);
     }
@@ -108,6 +115,7 @@ public class AuthController {
     ) {
 
         //authService.logout(user);
+        //delets the cookie
 
         return ResponseEntity.noContent().build();
     }
