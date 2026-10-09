@@ -129,27 +129,25 @@ public class AuthService {
         User savedUser = userRepo.save(user);
         pendingRepo.delete(pending);
 
-        /// need jwt here cause I'm doing auto log in. (return jwt for auto login)
+        // need jwt here cause I'm doing auto log in. (return jwt for auto login)
         return jwtService.generateToken(savedUser);
     }
 
     //login
     public String login( String email, String password) {
-        /// find user by email
+        // find user by email
         User user = userRepo
                 .findByEmail(email)
                 .orElseThrow(InvalidCredentialsException::new);
 
-        /// check password
+        // check password
         if( !passwordEncoder.matches( password, user.getPasswordHash() ) )
             throw new InvalidCredentialsException();
 
-        /// genarate token
-        /// send back the token
+        // generate & send back the token
         return jwtService.generateToken(user);
     }
 
-    //verifyOTP
     //forgotPass
     public void forgetPassword(String email){
         User user = userRepo.findByEmail(email).orElseThrow();

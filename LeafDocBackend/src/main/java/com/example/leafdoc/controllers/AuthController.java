@@ -82,7 +82,12 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPass(@RequestParam @Email(message = "Invalid email format") @NotBlank String email ) {
+    public ResponseEntity<Void> forgotPass(
+            @RequestParam
+            @Email(message = "Invalid email format")
+            @NotBlank
+            String email
+    ) {
         authService.forgetPassword(email);
         return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
@@ -100,7 +105,6 @@ public class AuthController {
             @AuthenticationPrincipal
             AuthenticatedUserPrincipal user
     ) {
-        //return userService.getUser(user.userId());
         return ResponseEntity.ok()
                 .body(user);
     }
