@@ -2,18 +2,18 @@ package com.example.leafdoc.service;
 
 import com.example.leafdoc.enums.Role;
 import com.example.leafdoc.util.PendingRegistrationPayload;
-import com.example.leafdoc.DTO.auth.RegisterRequest;
 import com.example.leafdoc.entity.VerificationToken;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
 import com.example.leafdoc.repository.VerificationTokenRepository;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.jwtService;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 import tools.jackson.databind.ObjectMapper;
 
@@ -25,12 +25,13 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.HexFormat;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepo;
-    private final VerificationTokenRepository pendingRepo;
+    private final VerificationTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final jwtService jwtService;
     private final EmailService emailService;
@@ -69,7 +70,7 @@ public class AuthService {
         if (userRepo.existsByEmail(email))
             throw new InvalidCredentialsException(); // todo: 409 Conflict- implement later
 
-        if (pendingRepo.existsByEmail(email))
+        if (tokenRepo.existsByEmail(email))
             throw new InvalidCredentialsException();
 
         //* generate random token
@@ -93,7 +94,7 @@ public class AuthService {
         );
 
 
-        pendingRepo.save(token);
+        tokenRepo.save(token);
         String link = UriComponentsBuilder
                 .fromUriString(frontendUrl)
                 .path("/verify")
@@ -101,13 +102,16 @@ public class AuthService {
                 .build()
                 .toUriString();
 
+        log.debug("Email Verification Link: {}", link);
+
         emailService.sendVarificationEmail(email, name, link);
     }
 
     //verify
+    @Transactional
     public String verifyToken(String token) {
 
-        VerificationToken pending = pendingRepo.findByVerificationTokenHash(hashToken(token))
+        VerificationToken pending = tokenRepo.findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!pending.getExpires_at().isAfter(LocalDateTime.now())) {
@@ -127,7 +131,7 @@ public class AuthService {
         user.setRole(payload.role());
 
         User savedUser = userRepo.save(user);
-        pendingRepo.delete(pending);
+        tokenRepo.delete(pending);
 
         // need jwt here cause I'm doing auto log in. (return jwt for auto login)
         return jwtService.generateToken(savedUser);
@@ -149,25 +153,55 @@ public class AuthService {
     }
 
     //forgotPass
+    @Transactional
     public void forgetPassword(String email){
-        User user = userRepo.findByEmail(email).orElseThrow();
-        //Request a reset email
+        User user = userRepo.findByEmail(email).orElseThrow(InvalidCredentialsException::new);
 
-        // genarates reset token and send (sent via email)
+        String rawToken = generateRawToken();
+        LocalDateTime now = LocalDateTime.now();
+        VerificationToken token = new VerificationToken();
+
+        //token.setType(TokenType.PASSWORD_RESET);
+        token.setVerification_token_hash( hashToken(rawToken) );
+        token.setCreated_at(now);
+        token.setExpires_at(now.plusMinutes(15));
+        token.setSerialisedData(
+                objectMapper.writeValueAsString(user.getEmail())
+        );
+
+        tokenRepo.save(token);
+
+        //create link with raw token
+        String link = UriComponentsBuilder
+                .fromUriString(frontendUrl)
+                .path("/reset-password")
+                .queryParam("token", rawToken)
+                .build()
+                .toUriString();
+
+        log.debug("Forget Password Link: {}", link);
+
+        emailService.sendPasswordResetEmail(user.getEmail() , user.getName(), link);
+
     }
     //resetPass
-    public boolean resetPassword(String token, String newPassword) {
-        /* request body
-         * {
-         *       token: ...
-         *       newPassword: *****
-         * }
-         * */
-        String json = objectMapper.writeValueAsString(new Object());
-        Object o =  objectMapper.readValue(json, Object.class);
-        //verify the token and set the new passwordeeer
-        // it also takes in the new password for user
-        return false;
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+        VerificationToken t = tokenRepo
+                .findByVerificationTokenHash(hashToken(token))
+                .orElseThrow(InvalidCredentialsException::new);
+
+        if (!t.getExpires_at().isAfter(LocalDateTime.now())) {
+            throw new InvalidCredentialsException(); // InvalidTokenException();
+        }
+
+        String email =  objectMapper.readValue(t.getSerialisedData(), String.class);
+
+        int updated = userRepo.updatePasswordHash( email, passwordEncoder.encode(newPassword) );
+        if (updated != 1)
+            throw new InvalidCredentialsException();
+
+        tokenRepo.delete(t);
     }
     //logout
 }

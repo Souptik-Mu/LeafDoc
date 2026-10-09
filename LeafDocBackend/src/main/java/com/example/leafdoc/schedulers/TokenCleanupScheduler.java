@@ -10,12 +10,12 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
-public class PendingRegistrationCleanupScheduler {
+public class TokenCleanupScheduler {
     private final VerificationTokenRepository repo;
 
     @Scheduled(fixedRate = 120_000) // 2 mins
     @Transactional
-    public void deleteExpiredPendingRegistrations() {
+    public void deleteExpiredTokens() {
         repo.deleteByExpiresAtBefore(
                 LocalDateTime.now()
         );

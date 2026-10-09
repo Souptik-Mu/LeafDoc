@@ -94,9 +94,8 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPass(@Valid @RequestBody ResetPassRequest request ) {
-
-        HttpStatus status = authService.resetPassword(request.token(), request.newPassword()) ? HttpStatus.OK : HttpStatus.NO_CONTENT;
-        return  ResponseEntity.status(HttpStatus.ACCEPTED).build(); // either 204(no content) or 200 OK
+        authService.resetPassword(request.token(), request.newPassword());
+        return  ResponseEntity.status(HttpStatus.OK).build();
     }
 
 
