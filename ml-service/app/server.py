@@ -1,6 +1,6 @@
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File, Header
+from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File, Header, Depends
 from fastapi.responses import JSONResponse
 
 import config
@@ -29,12 +29,16 @@ class Server:
 
     def _validate_service_key(self, x_ml_service_key: str = Header(...) ):
         if x_ml_service_key != config.SERVICE_KEY :
-            raise HTTPException(status_code=403)
+            raise HTTPException(status_code=403, detail="Error: Unauthorised access!")
        
 
     #ENDPOINTS 
 
-    async def predict(self, file: UploadFile = File(...) ) -> Response: #_: None = Depends(self._validate_service_key)
+    async def predict(self,
+                file: UploadFile = File(...),
+                _: None = Depends(_validate_service_key)
+        ) -> Response: 
+        
         data : bytes = await file.read()
         # receive image
         # call predictor
@@ -48,7 +52,7 @@ class Server:
         )
     
     async def get(self):
-         return {"msg" : "Helloooids"}
+        return {"msg" : "Hello from ml service. ", "status":"Connected" }
 
 
     def start(self) -> None:
