@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/verify-email",
                                 "/auth/forgot-password",
-                                "/auth/reset-password"
+                                "/auth/reset-password",
                                 "/ml/test"
                         ).permitAll().anyRequest().authenticated()
                 )
