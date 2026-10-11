@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/auth/login",
                                 "/auth/verify-email",
                                 "/api/auth/forgot-password",
-                                "/api/auth/reset-password"
+                                "/api/auth/reset-password",
+                                "/ml/test"
                         ).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(
