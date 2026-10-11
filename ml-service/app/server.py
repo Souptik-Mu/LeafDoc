@@ -14,7 +14,7 @@ class Server:
     def _configure_routes(self):
         self.app.add_api_route("/ml/predict", self.predict , methods=["POST"])
         self.app.add_api_route("/ml", self.get , methods=["GET"])
-
+        self.app.add_api_route("/ml/health", self.health, methods=["GET"])
         
     @staticmethod
     def _defaultExceptionHandler(request:Request , exc: Exception) -> Response:
@@ -50,9 +50,16 @@ class Server:
                 "size": len(data)
             }
         )
+
+    async def health(self, _: None = Depends(_validate_service_key))  -> dict[str,str]:
+        return {
+            "service": "ML Service",
+            "status": "Connected",
+            "authentication": "Valid"
+        }
     
-    async def get(self):
-        return {"msg" : "Hello from ml service. ", "status":"Connected" }
+    async def get(self) -> dict[str,str]:
+        return {"msg" : "Hello from ml service. ", "status":"Connected", "authorization" : "unknown" }
 
 
     def start(self) -> None:
