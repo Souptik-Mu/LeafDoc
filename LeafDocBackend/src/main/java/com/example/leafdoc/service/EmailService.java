@@ -3,7 +3,6 @@ package com.example.leafdoc.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -15,13 +14,15 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender mailSender;
-    private final SpringTemplateEngine templateEngine; //thymleaf
+    private final SpringTemplateEngine templateEngine; //thymeleaf
 
-//    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
-//        this.mailSender = mailSender;
-//        this.templateEngine =  templateEngine;
-//        /*todo: i can just do @RequiredArgsConstructor for auto constructor injection */
-//    }
+/*
+    public EmailService(JavaMailSender mailSender, SpringTemplateEngine templateEngine) {
+        this.mailSender = mailSender;
+        this.templateEngine =  templateEngine;
+        /todo :i can just do @RequiredArgsConstructor for auto constructor injection * /
+    }
+*/
 
     @Async("emailExecutor")
     public void sendVarificationEmail(String to, String user, String link) {
@@ -45,27 +46,26 @@ public class EmailService {
     }
 
     @Async("emailExecutor")
-    public void sendPasswordResetEmail(String to){
+    public void sendPasswordResetEmail(String to, String user, String link) {
+        Context ctx = new Context();
+        ctx.setVariable("name", user);
+        ctx.setVariable("resetLink", link);
+
+        String html = templateEngine.process("emails/password-reset-email", ctx);
         try {
-
             MimeMessage message = mailSender.createMimeMessage();
-
-            MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true);
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
-            helper.setSubject("Some test random Email");
-            helper.setText(
-                    "<html> put html here</html>",
-                    true);
+            helper.setSubject("Password reset Email");
+            helper.setText(html, true);
 
             mailSender.send(message);
-        }
-        catch (MessagingException e) {
 
+        } catch (MessagingException e) {
             throw new RuntimeException(e);
-
         }
     }
+
     @Async("emailExecutor")
     public void sendDummyEmail(String to){
         Context ctx = new Context();
