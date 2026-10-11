@@ -6,7 +6,7 @@ PORT: Final[int] = 8000
 LOG_LEVEL: Final[str] = "info" #or debug
 
 APP_TITLE: Final[str] = "App Title"
-SERVICE_KEY: Final[str] = "secret_key"
+SERVICE_KEY: Final[str] = "SECRET_KEY"
 
 ALLOWED_TYPES : Final[ set[str] ] = {
     "image/jpeg",

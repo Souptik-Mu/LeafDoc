@@ -1,6 +1,6 @@
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File, Header
+from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File, Header, Depends
 from fastapi.responses import JSONResponse
 
 import config
@@ -14,7 +14,7 @@ class Server:
     def _configure_routes(self):
         self.app.add_api_route("/ml/predict", self.predict , methods=["POST"])
         self.app.add_api_route("/ml", self.get , methods=["GET"])
-
+        self.app.add_api_route("/ml/health", self.health, methods=["GET"])
         
     @staticmethod
     def _defaultExceptionHandler(request:Request , exc: Exception) -> Response:
@@ -29,12 +29,16 @@ class Server:
 
     def _validate_service_key(self, x_ml_service_key: str = Header(...) ):
         if x_ml_service_key != config.SERVICE_KEY :
-            raise HTTPException(status_code=403)
+            raise HTTPException(status_code=403, detail="Error: Unauthorised access!")
        
 
     #ENDPOINTS 
 
-    async def predict(self, file: UploadFile = File(...) ) -> Response: #_: None = Depends(self._validate_service_key)
+    async def predict(self,
+                file: UploadFile = File(...),
+                _: None = Depends(_validate_service_key)
+        ) -> Response: 
+        
         data : bytes = await file.read()
         # receive image
         # call predictor
@@ -46,9 +50,16 @@ class Server:
                 "size": len(data)
             }
         )
+
+    async def health(self, _: None = Depends(_validate_service_key))  -> dict[str,str]:
+        return {
+            "service": "ML Service",
+            "status": "Connected",
+            "authentication": "Valid"
+        }
     
-    async def get(self):
-         return {"msg" : "Helloooids"}
+    async def get(self) -> dict[str,str]:
+        return {"msg" : "Hello from ml service. ", "status":"Connected", "authorization" : "unknown" }
 
 
     def start(self) -> None:

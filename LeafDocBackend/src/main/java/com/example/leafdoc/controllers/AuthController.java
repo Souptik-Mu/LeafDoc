@@ -113,10 +113,24 @@ public class AuthController {
             @AuthenticationPrincipal
             AuthenticatedUserPrincipal user
     ) {
+        // removes the cookie from browser
+        ResponseCookie cookie = ResponseCookie
+                .from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
+
+
+        return  ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
 
         //authService.logout(user);
         //delets the cookie
 
-        return ResponseEntity.noContent().build();
+        //return ResponseEntity.noContent().build();
     }
 }
