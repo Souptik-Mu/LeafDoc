@@ -17,12 +17,12 @@ public class VerificationToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String verification_token_hash;
+    @Column(name = "verification_token_hash", nullable = false, unique = true)
+    private String verificationTokenHash;
     @Column(name="created_at", nullable = false, updatable = false)
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
     @Column(name="expires_at", nullable = false, updatable = false)
-    private LocalDateTime expires_at;
+    private LocalDateTime expiresAt;
 
     @Column(nullable = false)
     private String serialisedData;

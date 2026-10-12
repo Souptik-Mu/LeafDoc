@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor()
 //@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
-    // get back uuid(auto genarated)
+    // get back uuid(auto generated)
     ///id (PK), name, email (unique), password_hash, role, created_at
 
     @Id
@@ -23,8 +23,9 @@ public class User {
     @Column(name="user_name", nullable = false)
     private String name;
 
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
+
     @Column(name="password_hash", nullable = false)
     private String passwordHash;
 

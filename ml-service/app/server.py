@@ -10,11 +10,28 @@ class Server:
         self.app = FastAPI(title= config.APP_TITLE )
         self._configure_routes()        
         self.app.add_exception_handler(Exception, self._defaultExceptionHandler)
+        #self.app.add_middleware()
+
+        # @self.app.middleware("http") #DEBUG - shows the incomming request in detail
+        # async def log_request(request: Request, call_next):
+        #     print("\n========== INCOMING REQUEST ==========")
+        #     print("Method:", request.method)
+        #     print("URL:", request.url)
+        #     print("Path:", request.url.path)
+        #     print("Headers:", dict(request.headers))
+
+        #     response = await call_next(request)
+
+        #     print("Response status:", response.status_code)
+        #     print("======================================\n")
+
+        #     return response
+
         
     def _configure_routes(self):
         self.app.add_api_route("/ml/predict", self.predict , methods=["POST"])
         self.app.add_api_route("/ml", self.get , methods=["GET"])
-        self.app.add_api_route("/ml/health", self.health, methods=["GET"])
+        self.app.add_api_route("/ml/health", self.health, methods=["GET","POST","OPTIONS"])
         
     @staticmethod
     def _defaultExceptionHandler(request:Request , exc: Exception) -> Response:
@@ -26,11 +43,11 @@ class Server:
                      "msg": str(exc)
                     }
             )
-
-    def _validate_service_key(self, x_ml_service_key: str = Header(...) ):
+    @staticmethod
+    def _validate_service_key( x_ml_service_key: str = Header(...) ):
         if x_ml_service_key != config.SERVICE_KEY :
             raise HTTPException(status_code=403, detail="Error: Unauthorised access!")
-       
+
 
     #ENDPOINTS 
 
