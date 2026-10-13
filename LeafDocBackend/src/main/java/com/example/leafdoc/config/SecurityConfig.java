@@ -30,7 +30,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
-                .csrf(CsrfConfigurer::spa)  // adds a csrf tokn managed by spring, [X-XSRF-TOKEN]
+                .csrf(AbstractHttpConfigurer::disable)  //CsrfConfigurer::spa adds a csrf tokn managed by spring, [X-XSRF-TOKEN]
                 .cors(cors -> {})
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(
