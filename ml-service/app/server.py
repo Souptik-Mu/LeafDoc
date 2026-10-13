@@ -3,11 +3,13 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File, Header, Depends
 from fastapi.responses import JSONResponse
 
+from imageProcessor import ImageProcessor
 import config
 
 class Server:
     def __init__(self):
         self.app = FastAPI(title= config.APP_TITLE )
+        self.image_processor = ImageProcessor()
         self._configure_routes()        
         self.app.add_exception_handler(Exception, self._defaultExceptionHandler)
         #self.app.add_middleware()
@@ -57,6 +59,22 @@ class Server:
         ) -> Response: 
         
         data : bytes = await file.read()
+
+        if not data:
+            raise HTTPException(
+                status_code=400,
+                detail="Uploaded file is empty"
+            )
+        try:
+            image = self.image_processor.decode(data)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=str(exc)
+            ) from exc
+        finally:
+            await file.close()
+        
         # receive image
         # call predictor
         # return prediction (json responce)
@@ -64,7 +82,10 @@ class Server:
             status_code=200,
             content={
                 "filename": file.filename,
-                "size": len(data)
+                "size": len(data),
+                "width": int(image.shape[1]),
+                "height": int(image.shape[0]),
+                "message": "Image decoded successfully"
             }
         )
 
