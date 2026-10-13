@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -20,11 +21,11 @@ import java.util.UUID;
 public class jwtService {
 
     private final SecretKey secretKey;
-    private final long accessTokenExpiry;
+    private final Duration accessTokenExpiry;
 
     public jwtService(
             @Value("${app.jwt.secret}") String key,
-            @Value("${app.jwt.expiration}") long expiration
+            @Value("${app.jwt.expiration}") Duration expiration
     ) {
         secretKey = Keys.hmacShaKeyFor(
                 //key.getBytes(StandardCharsets.UTF_8)
@@ -48,7 +49,7 @@ public class jwtService {
                 .issuedAt(Date.from(now))
                 .expiration(
                         Date.from(
-                                now.plusMillis(accessTokenExpiry)
+                                now.plus(accessTokenExpiry)
                         )
                 )
                 .signWith(secretKey)
@@ -62,6 +63,7 @@ public class jwtService {
             return false;
         }
     }
+
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -69,8 +71,6 @@ public class jwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-    ///  take user info from db, return the principal.
-    
 
     public Long getUserIdFromToken(String token) {
         Claims claims = extractAllClaims(token);
