@@ -16,7 +16,7 @@ public class TokenCleanupScheduler {
     @Scheduled(fixedRate = 120_000) // 2 mins
     @Transactional
     public void deleteExpiredTokens() {
-        repo.deleteByExpiresAtBefore(
+        repo.deleteExpiredTokens(
                 LocalDateTime.now()
         );
     }

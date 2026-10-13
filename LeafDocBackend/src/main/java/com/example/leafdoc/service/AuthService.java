@@ -70,8 +70,8 @@ public class AuthService {
         if (userRepo.existsByEmail(email))
             throw new InvalidCredentialsException(); // todo: 409 Conflict- implement later
 
-        if (tokenRepo.existsByEmail(email))
-            throw new InvalidCredentialsException();
+//        if (tokenRepo.existsByEmail(email))
+//            throw new InvalidCredentialsException();
 
         //* generate random token
         String rawToken = generateRawToken();
@@ -86,9 +86,9 @@ public class AuthService {
                 role
         );
 
-        token.setVerification_token_hash( hashToken(rawToken) );
-        token.setCreated_at(now);
-        token.setExpires_at(now.plusMinutes(15));
+        token.setVerificationTokenHash( hashToken(rawToken) );
+        token.setCreatedAt(now);
+        token.setExpiresAt(now.plusMinutes(15));
         token.setSerialisedData(
                 objectMapper.writeValueAsString(payload)
         );
@@ -114,7 +114,7 @@ public class AuthService {
         VerificationToken pending = tokenRepo.findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!pending.getExpires_at().isAfter(LocalDateTime.now())) {
+        if (!pending.getExpiresAt().isAfter(LocalDateTime.now())) {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
@@ -162,9 +162,9 @@ public class AuthService {
         VerificationToken token = new VerificationToken();
 
         //token.setType(TokenType.PASSWORD_RESET);
-        token.setVerification_token_hash( hashToken(rawToken) );
-        token.setCreated_at(now);
-        token.setExpires_at(now.plusMinutes(15));
+        token.setVerificationTokenHash( hashToken(rawToken) );
+        token.setCreatedAt(now);
+        token.setExpiresAt(now.plusMinutes(15));
         token.setSerialisedData(
                 objectMapper.writeValueAsString(user.getEmail())
         );
@@ -191,7 +191,7 @@ public class AuthService {
                 .findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!t.getExpires_at().isAfter(LocalDateTime.now())) {
+        if (!t.getExpiresAt().isAfter(LocalDateTime.now())) {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
