@@ -53,7 +53,7 @@ public class SecurityConfig {
                         jwtAuthFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
-                .exceptionHandling(e -> {}); // add custom exception handling pages
+                .exceptionHandling(e -> {});
         return http.build();
     }
 }
