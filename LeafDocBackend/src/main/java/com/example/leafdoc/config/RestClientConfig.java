@@ -6,16 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.client.JdkClientHttpRequestFactory;
-import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
-
-import java.net.http.HttpClient;
-import java.time.Duration;
 
 @Configuration
-public class MlClientConfig {
+public class RestClientConfig {
 
     @Bean("mlRestClient")
     public RestClient mlRestClient(
@@ -41,6 +35,18 @@ public class MlClientConfig {
                             );
                         }
                 )
+                .build();
+    }
+
+    @Bean("supabaseRestClient")
+    public RestClient supabaseRestClient(
+            RestClient.Builder builder,
+            @Value("${supabase.url}") String supabaseUrl,
+            @Value("${supabase.secret-key}") String secretKey) {
+
+        return builder.clone()
+                .baseUrl(supabaseUrl)
+                .defaultHeader("apikey", secretKey)
                 .build();
     }
 }
