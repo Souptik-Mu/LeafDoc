@@ -2,6 +2,7 @@ package com.example.leafdoc.service;
 
 import com.example.leafdoc.exceptions.MlServiceResponseException;
 import com.example.leafdoc.exceptions.MlServiceUnavailableException;
+import com.example.leafdoc.util.ImageFile;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,17 +26,11 @@ import java.util.function.Supplier;
 @Service
 public class MlService {
     private final RestClient restClient;
-    private final DataSize maxFileSize;
-    private final Set<String> allowedFileTypes;
 
     public MlService(
-            @Qualifier("mlRestClient") RestClient restClient,
-            @Value("${app.ml.upload.max-size:5MB}") DataSize maxFileSize,
-            @Value("${app.ml.upload.allowed-types}") Set<String> allowedTypes
+            @Qualifier("mlRestClient") RestClient restClient
     ) {
         this.restClient = restClient;
-        this.maxFileSize = maxFileSize;
-        this.allowedFileTypes = allowedTypes;
     }
 
     public Map<String, Object> check(){
@@ -54,22 +49,7 @@ public class MlService {
 
     public Map<String, Object> predict(MultipartFile file) {
 
-        if ( file == null || file.isEmpty() ) {
-            //throw new IllegalArgumentException("No file uploaded");
-            log.debug("File is empty");
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Please upload an image"
-            );
-        }
-
-        if (file.getSize() > maxFileSize.toBytes()){
-            log.debug("File is too large");
-            throw new ResponseStatusException(
-                    HttpStatus.PAYLOAD_TOO_LARGE,
-                    "Image exceeds maximum size of " + maxFileSize
-            );
-        }
+        ImageFile image = new ImageFile(file); // auto validates the image, if anything goes south throws tantrum(Exception)
 
         log.debug(file.getContentType());
         log.debug(file.getName());
@@ -77,23 +57,13 @@ public class MlService {
         log.debug(String.valueOf(file.getSize()));
         log.debug(file.getClass().toString());
 
-        String ext = file.getOriginalFilename()
-                .substring(
-                        file.getOriginalFilename()
-                                .lastIndexOf(".") + 1
-                )
-                .toLowerCase();
-
-        if (!allowedFileTypes.contains(ext)){
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Please upload an correct image"
-            );
-        }
         MultipartBodyBuilder body = new MultipartBodyBuilder();
 
-        body.part("file", file.getResource())
-                .filename(file.getOriginalFilename());
+        body.part("file", image.file().getResource())
+                .filename(file.getOriginalFilename())
+                .contentType(
+                        MediaType.parseMediaType(image.getContentType())
+                );;
 
         try {
             return restClient.post()
