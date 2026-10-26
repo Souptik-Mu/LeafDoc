@@ -1,33 +1,24 @@
-package com.example.leafdoc.service;
+package com.example.leafdoc.client;
 
-import com.example.leafdoc.exceptions.MlServiceResponseException;
 import com.example.leafdoc.exceptions.MlServiceUnavailableException;
 import com.example.leafdoc.util.ImageFile;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.stereotype.Service;
-import org.springframework.util.unit.DataSize;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
 
 @Slf4j
-@Service
-public class MlService {
+@Component
+public class MlServiceClient {
     private final RestClient restClient;
 
-    public MlService(
+    public MlServiceClient(
             @Qualifier("mlRestClient") RestClient restClient
     ) {
         this.restClient = restClient;
@@ -59,8 +50,9 @@ public class MlService {
 
         MultipartBodyBuilder body = new MultipartBodyBuilder();
 
+        assert image.getContentType() != null;
         body.part("file", image.file().getResource())
-                .filename(file.getOriginalFilename())
+                .filename(image.getFileName()+"."+image.getExtension())
                 .contentType(
                         MediaType.parseMediaType(image.getContentType())
                 );;

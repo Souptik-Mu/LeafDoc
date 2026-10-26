@@ -2,6 +2,7 @@ package com.example.leafdoc.controllers;
 
 import com.example.leafdoc.DTO.plant.PlantResponse;
 import com.example.leafdoc.security.AuthenticatedUserPrincipal;
+import com.example.leafdoc.util.ImageFile;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +20,13 @@ public class PlantImageController {
             @PathVariable Long plantId,
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal AuthenticatedUserPrincipal principal
-    ){return null;}
+    ){
+
+
+
+        return null;
+
+    }
 
 
 }

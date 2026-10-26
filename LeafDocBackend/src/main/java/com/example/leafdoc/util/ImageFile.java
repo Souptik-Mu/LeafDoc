@@ -15,9 +15,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-@Configurable
+@Configurable(preConstruction = true)
 public class ImageFile {
-    /** some does do */
+    /** if it causes problem, make a function and paste the content of constructor there */
 
     @Value("${app.image.max-size:2MB}")
     private DataSize maxFileSize;
@@ -99,17 +99,22 @@ public class ImageFile {
 
     private boolean isValidName(){
         if (fileName == null || fileName.lastIndexOf('.') <= 0) {
-            return true;
+            return false;
         }
+        fileName = fileName.replace('\\', '/');
         fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
-        extension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT);
 
-        boolean isValidExtension = allowedFileTypes.stream()
-                .map(String::toLowerCase)
+        int dot = fileName.lastIndexOf('.');
+        if (dot <= 0 || dot == fileName.length() - 1) {
+            return false;
+        }
+
+        extension = fileName.substring(dot + 1).toLowerCase(Locale.ROOT);
+
+        return allowedFileTypes.stream()
                 .filter(MIME_EXTENSIONS::containsKey)
-                .anyMatch(type -> MIME_EXTENSIONS.get(type).contains(extension));
-
-        return fileName.isBlank() || fileName.lastIndexOf('.') <= 0 || !isValidExtension;
+                .map(MIME_EXTENSIONS::get)
+                .anyMatch(extensions -> extensions.contains(extension));
     }
 
     private String detectContentType() {
