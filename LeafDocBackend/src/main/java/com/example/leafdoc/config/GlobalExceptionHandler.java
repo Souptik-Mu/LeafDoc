@@ -3,6 +3,7 @@ package com.example.leafdoc.config;
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
 import com.example.leafdoc.exceptions.MlServiceResponseException;
 import com.example.leafdoc.exceptions.MlServiceUnavailableException;
+import com.example.leafdoc.exceptions.ResourceNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // valid check
+    /// validation check -> 400 BAD_REQUEST
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(
             MethodArgumentNotValidException ex
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", message));
     }
 
+    /// Invalid Credentials (authentication) -> 401 UNAUTHORISED
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<Map<String, String>> handleInvalidCredentials(
             InvalidCredentialsException ex
@@ -42,19 +44,23 @@ public class GlobalExceptionHandler {
                         "error", ex.getMessage()
                 ));
     }
-    // AccessDeniedException  -> HttpStatus.FORBIDDEN //403
-    @ExceptionHandler(MlServiceUnavailableException.class)
-    public ResponseEntity<Map<String, String>> handleMlServiceUnavailable(
-            MlServiceUnavailableException ex
-    ) {
+
+    // Access DeniedException  -> HttpStatus.FORBIDDEN //403
+
+    /// Resource not found -> 404 NOT_FOUND
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleResourceNotFound(
+            ResourceNotFoundException ex
+    ){
         return ResponseEntity
-                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .status(HttpStatus.NOT_FOUND)
                 .body(Map.of(
-                        "error", "ML_SERVICE_UNAVAILABLE",
+                        "error", "RESOURCE_NOT_FOUND",
                         "message", ex.getMessage()
                 ));
     }
 
+    /// Ml Service Error -> 502 BAD_GATEWAY
     @ExceptionHandler(MlServiceResponseException.class)
     public ResponseEntity<Map<String, String>> handleMlServiceResponseException(
             MlServiceResponseException ex
@@ -65,6 +71,19 @@ public class GlobalExceptionHandler {
                         "error", "ML_SERVICE_ERROR",
                         "message", "The ML service returned an unexpected response",
                         "status", ex.getMessage()
+                ));
+    }
+
+    /// Ml Service Unavailable -> 503 SERVICE_UNAVAILABLE
+    @ExceptionHandler(MlServiceUnavailableException.class)
+    public ResponseEntity<Map<String, String>> handleMlServiceUnavailable(
+            MlServiceUnavailableException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of(
+                        "error", "ML_SERVICE_UNAVAILABLE",
+                        "message", ex.getMessage()
                 ));
     }
 }
