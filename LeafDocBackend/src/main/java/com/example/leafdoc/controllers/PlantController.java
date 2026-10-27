@@ -7,9 +7,11 @@ import com.example.leafdoc.service.PlantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -82,4 +84,40 @@ public class PlantController {
                 .status(HttpStatus.NO_CONTENT)    //204 (success with no response body)
                 .build();
     }
+
+    /* * | Plant Image CRUD | * */
+
+    @PostMapping(
+            value = "/{plantId}/image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PlantResponse> uploadImage(
+            @PathVariable Long plantId,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal AuthenticatedUserPrincipal principal
+    ){
+
+
+
+        return null;
+
+    }
+
+    /// IDK yet that a plant can hold multiple image or not, for now one plant one image
+    //get {id}
+    @GetMapping("/{plantId}/image")
+    public ResponseEntity<PlantResponse> getPlantImage(
+            @PathVariable Long plantId
+    ){return null;}
+
+    @PutMapping("/{plantId}/image")
+    public ResponseEntity<PlantResponse> updatePlantImage(
+            @PathVariable Long plantId
+    ){return null;}
+
+    //delete {id}
+    @DeleteMapping("/{plantId}/image")
+    public ResponseEntity<PlantResponse> deletePlantImage(
+            @PathVariable Long plantId
+    ){return null;}
+
 }

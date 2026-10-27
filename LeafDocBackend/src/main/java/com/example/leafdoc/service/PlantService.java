@@ -1,15 +1,19 @@
 package com.example.leafdoc.service;
 
+import com.example.leafdoc.DTO.ImageUploadResult;
 import com.example.leafdoc.DTO.plant.CreatePlantRequest;
 import com.example.leafdoc.DTO.plant.PlantResponse;
+import com.example.leafdoc.client.ImageStorageClient;
 import com.example.leafdoc.entity.Plant;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.exceptions.ResourceNotFoundException;
 import com.example.leafdoc.repository.PlantRepository;
+import com.example.leafdoc.util.ImageFile;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +22,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlantService {
 
-    private final PlantRepository plantRepo;
     private final EntityManager entityManager; // spring provides
+    private final ImageStorageClient imageStorageClient;
+    private final PlantRepository plantRepo;
 
     public void createPlant(
             Long userId,
@@ -80,5 +85,19 @@ public class PlantService {
         int c = plantRepo.deleteByPlantIdAndUserId(userId, plantId);
         if (c == 0)
             throw new ResourceNotFoundException();
+    }
+
+    /* * | Plant Image CRUD | * */
+
+
+
+    public void upload(MultipartFile file)
+    {
+        ImageFile imageFile = new ImageFile(file);   /// auto validates
+
+        // build an path, add db , after upload & store (user, image path, [contentType],  ...)
+
+        ImageUploadResult res =  imageStorageClient.upload(imageFile, "path/name.jpeg");
+
     }
 }
