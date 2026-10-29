@@ -39,6 +39,9 @@ public class MlServiceClient {
     }
 
     public Map<String, Object> predict(MultipartFile file) {
+        //todo: ask tiyasa about the genaral responce pattern from the ml model, types of crop supported.
+        //  make a DTO with ML service return data type.
+        //  Add a mlService layer above it that stores scans includes user, image path, [maybe response parts], scan date time
 
         ImageFile image = new ImageFile(file); // auto validates the image, if anything goes south throws tantrum(Exception)
 
