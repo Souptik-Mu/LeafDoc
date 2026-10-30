@@ -9,7 +9,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "plant_images")
+@Table(
+        name = "plant_image",
+        indexes = {
+                @Index(
+                        name = "idx_plant_image_latest",
+                        columnList = "plant_id, created_at, id"
+                )
+        }
+)
 @Getter
 @Setter
 @RequiredArgsConstructor

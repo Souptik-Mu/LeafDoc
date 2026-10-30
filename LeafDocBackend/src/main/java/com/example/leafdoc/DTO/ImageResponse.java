@@ -8,12 +8,4 @@ public record ImageResponse(
         Long id,
         String imageUrl,
         Instant createdAt
-) {
-    public static ImageResponse from(PlantImage image) {
-        return new ImageResponse(
-                image.getId(),
-                image.getObjectPath(), // Replace with URL generation if needed
-                image.getCreatedAt()
-        );
-    }
-}
+) {}
