@@ -1,12 +1,13 @@
 package com.example.leafdoc.client;
 
-import com.example.leafdoc.DTO.ImageUploadResult;
+import com.example.leafdoc.exceptions.ImageStorageException;
 import com.example.leafdoc.util.ImageFile;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -16,7 +17,7 @@ public class ImageStorageClient {
 
     private final RestClient sbRestClient;
     private final String bucketName;
-    private final String supabaseUrl;
+    private final String publicBaseUrl;
 
     public ImageStorageClient(
             @Qualifier("supabaseRestClient") RestClient sbRestClient,
@@ -24,40 +25,37 @@ public class ImageStorageClient {
             @Value("${supabase.url}") String supabaseUrl) {
         this.bucketName = bucketName;
         this.sbRestClient = sbRestClient;
-        this.supabaseUrl = supabaseUrl;
+        this.publicBaseUrl = supabaseUrl.replaceAll("/+$", "")
+                + "/storage/v1/object/public/"
+                + bucketName + "/";
     }
 
-    public ImageUploadResult upload (ImageFile image, String storePath) { // later changing to imageFile
+    public String upload (ImageFile image, String storePath) {
 
         String contentType = image.getContentType();
+        try{
+            sbRestClient.post()
+                    .uri("/storage/v1/object/{bucket}/{path}", bucketName, storePath)
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header("x-upsert", "false") // do not overwrite
+                    .body(image.bytes())
+                    .retrieve()
+                    .toBodilessEntity();
 
-        sbRestClient.post()
-                .uri("/storage/v1/object/{bucket}/{path}", bucketName, storePath)
-                .contentType(MediaType.parseMediaType(contentType))
-                .header("x-upsert", "false") // do not overwrite
-                .body(image.bytes())
-                .retrieve()
-                .toBodilessEntity();
+            return getPublicImageUrl(storePath);
 
-        return new ImageUploadResult(
-                storePath,
-                contentType,
-                getPublicImageUrl(storePath)
-        );
+        } catch (RestClientException ex) {
+            throw new ImageStorageException(
+                    "An unexpected error occurred while uploading the image.",
+                    ex
+            );
+        }
     }
 
     public String getPublicImageUrl(String path) {
-        String baseUrl = supabaseUrl.replaceAll("/+$", "");
-
-        String encodedPath = UriUtils.encodePath(
+        return publicBaseUrl + UriUtils.encodePath(
                 path, StandardCharsets.UTF_8
         );
-
-        return baseUrl
-                + "/storage/v1/object/public/"
-                + bucketName
-                + "/"
-                + encodedPath;
     }
 
     public void delete(String path) {
@@ -67,5 +65,4 @@ public class ImageStorageClient {
                 .retrieve()
                 .toBodilessEntity();
     }
-
 }

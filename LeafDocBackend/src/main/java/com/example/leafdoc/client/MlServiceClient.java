@@ -34,7 +34,10 @@ public class MlServiceClient {
                    .body(new ParameterizedTypeReference<>() {});
 
         } catch (ResourceAccessException e) {
-            throw new MlServiceUnavailableException();
+            throw new MlServiceUnavailableException(
+                    "Unable to communicate with ML service",
+                    e
+            );
         }
     }
 
@@ -68,7 +71,10 @@ public class MlServiceClient {
                             .retrieve()
                             .body(new ParameterizedTypeReference<>() {});
         } catch (ResourceAccessException e) {
-            throw new MlServiceUnavailableException();
+            throw new MlServiceUnavailableException(
+                    "Unable to communicate with ML service",
+                    e
+            );
         }
     }
 }
