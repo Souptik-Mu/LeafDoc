@@ -3,7 +3,9 @@ package com.example.leafdoc.entity;
 import com.example.leafdoc.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CurrentTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -33,19 +35,15 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @Column(name="created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    @CurrentTimestamp
+    @Column(name="created_at", nullable = false, insertable = false, updatable = false)
+    private Instant createdAt;
 
     public User(String userName, String email, String passwordHash, Role role) {
         this.name = userName;
         this.email = email;
         this.passwordHash = passwordHash;
         this.role = role != null ? role : Role.GUEST;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
     }
 
 }

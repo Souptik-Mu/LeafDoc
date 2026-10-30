@@ -7,7 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="plants")
+@Table(name="plants",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_plant_user_nickname",
+                        columnNames = {"user_id", "nickname"}
+                )
+        }
+)
 @NoArgsConstructor
 @Getter
 @Setter
@@ -17,7 +24,7 @@ public class Plant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nickname", nullable = false, unique = true)
+    @Column(name = "nickname", nullable = false)
     private String nickname;
 
     @Column(name = "crop_type", nullable = false)

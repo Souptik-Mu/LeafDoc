@@ -1,9 +1,6 @@
 package com.example.leafdoc.config;
 
-import com.example.leafdoc.exceptions.InvalidCredentialsException;
-import com.example.leafdoc.exceptions.MlServiceResponseException;
-import com.example.leafdoc.exceptions.MlServiceUnavailableException;
-import com.example.leafdoc.exceptions.ResourceNotFoundException;
+import com.example.leafdoc.exceptions.*;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,6 +68,19 @@ public class GlobalExceptionHandler {
                         "error", "ML_SERVICE_ERROR",
                         "message", "The ML service returned an unexpected response",
                         "status", ex.getMessage()
+                ));
+    }
+
+    /// Image Storage Error -> 502 BAD_GATEWAY
+    @ExceptionHandler(ImageStorageException.class)
+    public ResponseEntity<Map<String, String>> handleImageStorageException(
+            ImageStorageException ex
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(Map.of(
+                        "error", "IMAGE_STORAGE_ERROR",
+                        "message", ex.getMessage()
                 ));
     }
 
