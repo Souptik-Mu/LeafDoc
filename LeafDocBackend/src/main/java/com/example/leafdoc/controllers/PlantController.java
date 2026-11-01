@@ -135,7 +135,7 @@ public class PlantController {
                 );
     }
 
-    @DeleteMapping("/{plantId}/image/{imageId})")
+    @DeleteMapping("/{plantId}/image/{imageId}")
     public ResponseEntity<Void> deletePlantImage(
             @PathVariable Long plantId,
             @PathVariable Long imageId,
