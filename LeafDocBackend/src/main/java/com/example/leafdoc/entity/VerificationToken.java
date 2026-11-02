@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name= "pending_registration")
+@Table(name= "tokens")
 @Getter
 @Setter
 @NoArgsConstructor
