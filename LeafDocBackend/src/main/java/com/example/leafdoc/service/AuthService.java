@@ -21,7 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HexFormat;
 
@@ -34,6 +36,7 @@ public class AuthService {
     private final VerificationTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final jwtService jwtService;
+    private final UserSessionService sessionService;
     private final EmailService emailService;
     private final ObjectMapper objectMapper;
 
@@ -70,13 +73,10 @@ public class AuthService {
         if (userRepo.existsByEmail(email))
             throw new InvalidCredentialsException(); // todo: 409 Conflict- implement later
 
-//        if (tokenRepo.existsByEmail(email))
-//            throw new InvalidCredentialsException();
-
         //* generate random token
         String rawToken = generateRawToken();
 
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         VerificationToken token = new VerificationToken();
 
         PendingRegistrationPayload payload = new PendingRegistrationPayload(
@@ -88,7 +88,7 @@ public class AuthService {
 
         token.setVerificationTokenHash( hashToken(rawToken) );
         token.setCreatedAt(now);
-        token.setExpiresAt(now.plusMinutes(15));
+        token.setExpiresAt(now.plus(15, ChronoUnit.MINUTES));
         token.setSerialisedData(
                 objectMapper.writeValueAsString(payload)
         );
@@ -114,7 +114,7 @@ public class AuthService {
         VerificationToken pending = tokenRepo.findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!pending.getExpiresAt().isAfter(LocalDateTime.now())) {
+        if (!pending.getExpiresAt().isAfter(Instant.now())) {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
@@ -133,8 +133,10 @@ public class AuthService {
         User savedUser = userRepo.save(user);
         tokenRepo.delete(pending);
 
+        String sessionId = sessionService.createSession(user, "");
+
         // need jwt here cause I'm doing auto log in. (return jwt for auto login)
-        return jwtService.generateToken(savedUser);
+        return jwtService.generateToken(savedUser, sessionId);
     }
 
     //login
@@ -148,8 +150,10 @@ public class AuthService {
         if( !passwordEncoder.matches( password, user.getPasswordHash() ) )
             throw new InvalidCredentialsException();
 
+        String sessionId = sessionService.createSession(user, "");
+
         // generate & send back the token
-        return jwtService.generateToken(user);
+        return jwtService.generateToken(user,sessionId);
     }
 
     //forgotPass
@@ -158,13 +162,13 @@ public class AuthService {
         User user = userRepo.findByEmail(email).orElseThrow(InvalidCredentialsException::new);
 
         String rawToken = generateRawToken();
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         VerificationToken token = new VerificationToken();
 
         //token.setType(TokenType.PASSWORD_RESET);
         token.setVerificationTokenHash( hashToken(rawToken) );
         token.setCreatedAt(now);
-        token.setExpiresAt(now.plusMinutes(15));
+        token.setExpiresAt(now.plus(15, ChronoUnit.MINUTES));
         token.setSerialisedData(
                 objectMapper.writeValueAsString(user.getEmail())
         );
@@ -191,7 +195,7 @@ public class AuthService {
                 .findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
 
-        if (!t.getExpiresAt().isAfter(LocalDateTime.now())) {
+        if (!t.getExpiresAt().isAfter(Instant.now())) {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 

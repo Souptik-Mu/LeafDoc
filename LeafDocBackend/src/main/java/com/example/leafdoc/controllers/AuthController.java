@@ -107,7 +107,7 @@ public class AuthController {
                 .body(user);
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal
             AuthenticatedUserPrincipal user

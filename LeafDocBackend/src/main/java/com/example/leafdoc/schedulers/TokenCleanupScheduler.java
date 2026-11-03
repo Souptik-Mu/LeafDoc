@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Component
@@ -17,7 +18,7 @@ public class TokenCleanupScheduler {
     @Transactional
     public void deleteExpiredTokens() {
         repo.deleteExpiredTokens(
-                LocalDateTime.now()
+                Instant.now()
         );
     }
 }
