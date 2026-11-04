@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,9 +25,9 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class jwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final jwtService jwtService;
+    private final JwtService jwtService;
     private final UserSessionRepository sessionRepo;
 
     @Override
@@ -53,13 +54,13 @@ public class jwtAuthFilter extends OncePerRequestFilter {
         }
 
         try{
-            jwtService.TokenData tokenData = jwtService.parseAndValidate(token);
+            JwtService.TokenData tokenData = jwtService.parseAndValidate(token);
 
-            Long userId = tokenData.userId();
-            String sessionId = tokenData.sessionId();
-            Role role = tokenData.role();
-
-            Optional<UserSession> session = sessionRepo.findActiveSession(sessionId,userId, Instant.now());
+            Optional<UserSession> session = sessionRepo.findActiveSession(
+                    tokenData.sessionId(),
+                    tokenData.userId(),
+                    Instant.now()
+            );
 
             if( session.isEmpty() ){
                     rejectRequest(response,"Session expired or revoked");
@@ -67,11 +68,15 @@ public class jwtAuthFilter extends OncePerRequestFilter {
             }
 
             UsernamePasswordAuthenticationToken authentication =
-                    getUsernamePasswordAuthenticationToken(userId, role);
+                    getUsernamePasswordAuthenticationToken(
+                            tokenData.userId(),
+                            tokenData.role(),
+                            tokenData.sessionId()
+                    );
 
-            SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authentication);
+            SecurityContextHolder.setContext(context);
 
         }catch (JwtException | IllegalArgumentException e){
             System.out.println("JWT Validation Failed: " + e.getMessage());
@@ -81,9 +86,9 @@ public class jwtAuthFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private static @NonNull UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(Long userId, Role role) {
+    private static @NonNull UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(Long userId, Role role, String sessionId) {
         AuthenticatedUserPrincipal principal =
-                new AuthenticatedUserPrincipal(userId, role);
+                new AuthenticatedUserPrincipal(userId, role, sessionId);
 
         SimpleGrantedAuthority authority =
                 new SimpleGrantedAuthority(

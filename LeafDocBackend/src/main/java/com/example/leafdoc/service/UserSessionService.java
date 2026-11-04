@@ -3,11 +3,12 @@ package com.example.leafdoc.service;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.entity.UserSession;
 import com.example.leafdoc.repository.UserSessionRepository;
-import com.example.leafdoc.security.jwtService;
+import com.example.leafdoc.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
@@ -19,7 +20,7 @@ import java.util.UUID;
 public class UserSessionService {
 
     private final UserSessionRepository sessionRepo;
-    private final jwtService jwtService;
+    private final JwtService jwtService;
 
     @Value("${app.jwt.expiration}")
     private Duration tokenExpiry;
@@ -50,6 +51,20 @@ public class UserSessionService {
         sessionRepo.save(session);
 
         return sessionId;
+    }
+
+    @Transactional
+    public void revokeSession(Long userId, String sessionId){
+        UserSession session = sessionRepo.findActiveSession(sessionId, userId, Instant.now()).orElse(null);
+
+        if(session != null){
+            session.setRevokedAt(Instant.now());    ///updating the table
+            sessionRepo.save(session);
+        }
+    }
+
+    public int revokeAllSessions(Long userId) {
+        return sessionRepo.revokeAllActiveSessions(userId, Instant.now());
     }
 
 }

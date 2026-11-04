@@ -2,6 +2,7 @@ package com.example.leafdoc.repository;
 
 import com.example.leafdoc.entity.UserSession;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -54,4 +55,25 @@ public interface UserSessionRepository
             @Param("userId") Long userId,
             @Param("now") Instant now
     );
+
+    @Modifying
+    @Query("""
+        UPDATE UserSession us
+        SET us.revokedAt = :now
+        WHERE us.user.id = :userId
+          AND us.revokedAt IS NULL
+          AND us.expiresAt > :now
+    """)
+    int revokeAllActiveSessions(
+            @Param("userId") Long userId,
+            @Param("now") Instant now
+    );
+
+    @Modifying
+    @Query("""
+        DELETE FROM UserSession us
+        WHERE us.expiresAt <= :now
+           OR us.revokedAt IS NOT NULL
+    """)
+    void deleteExpiredSessions(@Param("now") Instant now);
 }

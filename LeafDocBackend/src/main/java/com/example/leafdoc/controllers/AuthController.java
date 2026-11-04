@@ -8,6 +8,8 @@ import com.example.leafdoc.service.AuthService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -20,11 +22,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    public AuthController(AuthService authService) {
-        this.authService = authService;
-    }
+    @Value("${app.jwt.expiration}") private Duration tokenExpiry;
+
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest req) {
@@ -36,7 +38,7 @@ public class AuthController {
                 .secure(false) // true for HTTPS
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(Duration.ofHours(1))
+                .maxAge(tokenExpiry)
                 .build();
 
         return ResponseEntity.ok()
@@ -62,7 +64,7 @@ public class AuthController {
                 .secure(false) // true for HTTPS
                 .sameSite("Lax")
                 .path("/")
-                .maxAge(Duration.ofMinutes(20))
+                .maxAge(tokenExpiry)
                 .build();
 
         return  ResponseEntity.status(HttpStatus.CREATED)
@@ -70,15 +72,15 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/resend-verification")  //add it in security config (later)
-    public ResponseEntity<?> resend( @Valid @RequestBody RegisterRequest request) {
-        //* NICE TO HAVE FEATURE
-        // re-sends the current registration data.
-        // checked if the email is present in pendingUsers
-        // then new token generated, updated the time and token(hash) in db
-        // resend the email again with new token
-        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
-    }
+//    @PostMapping("/resend-verification")  //add it in security config (later)
+//    public ResponseEntity<?> resend( @Valid @RequestBody RegisterRequest request) {
+//        //* NICE TO HAVE FEATURE
+//        // re-sends the current registration data.
+//        // checked if the email is present in pendingUsers
+//        // then new token generated, updated the time and token(hash) in db
+//        // resend the email again with new token
+//        return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
+//    }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Void> forgotPass(
@@ -92,8 +94,11 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPass(@Valid @RequestBody ResetPassRequest request ) {
-        authService.resetPassword(request.token(), request.newPassword());
+    public ResponseEntity<Void> resetPass(
+            @AuthenticationPrincipal AuthenticatedUserPrincipal user,
+            @Valid @RequestBody ResetPassRequest request
+    ) {
+        authService.resetPassword(user.userId(), request.token(), request.newPassword());
         return  ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -112,7 +117,28 @@ public class AuthController {
             @AuthenticationPrincipal
             AuthenticatedUserPrincipal user
     ) {
-        // removes the cookie from browser
+        authService.logout(user.userId(), user.sessionId());
+
+        ResponseCookie cookie = ResponseCookie
+                .from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(0)      /// removes the cookie from browser
+                .build();
+
+        return  ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
+    }
+
+    @PostMapping("/logout-all")     ///logs out from all sessions including current
+    public ResponseEntity<Void> logoutAll(
+            @AuthenticationPrincipal AuthenticatedUserPrincipal user
+    ) {
+        authService.logoutAll(user.userId());
+
         ResponseCookie cookie = ResponseCookie
                 .from("accessToken", "")
                 .httpOnly(true)
@@ -122,14 +148,16 @@ public class AuthController {
                 .maxAge(0)
                 .build();
 
-
-        return  ResponseEntity.noContent()
+        return ResponseEntity.noContent()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .build();
-
-        //authService.logout(user);
-        //delets the cookie
-
-        //return ResponseEntity.noContent().build();
     }
+
+//    @GetMapping("/sessions")
+//    public ResponseEntity<Void> getSessions(
+//            @AuthenticationPrincipal AuthenticatedUserPrincipal user
+//    ) {
+//
+//    }
+    //DELETE /auth/sessions/{sessionId} — revoke a selected device.
 }

@@ -7,7 +7,7 @@ import com.example.leafdoc.entity.User;
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
 import com.example.leafdoc.repository.VerificationTokenRepository;
 import com.example.leafdoc.repository.UserRepository;
-import com.example.leafdoc.security.jwtService;
+import com.example.leafdoc.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +22,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HexFormat;
@@ -35,7 +34,7 @@ public class AuthService {
     private final UserRepository userRepo;
     private final VerificationTokenRepository tokenRepo;
     private final PasswordEncoder passwordEncoder;
-    private final jwtService jwtService;
+    private final JwtService jwtService;
     private final UserSessionService sessionService;
     private final EmailService emailService;
     private final ObjectMapper objectMapper;
@@ -133,7 +132,7 @@ public class AuthService {
         User savedUser = userRepo.save(user);
         tokenRepo.delete(pending);
 
-        String sessionId = sessionService.createSession(user, "");
+        String sessionId = sessionService.createSession(user, "Web Browser");
 
         // need jwt here cause I'm doing auto log in. (return jwt for auto login)
         return jwtService.generateToken(savedUser, sessionId);
@@ -150,7 +149,7 @@ public class AuthService {
         if( !passwordEncoder.matches( password, user.getPasswordHash() ) )
             throw new InvalidCredentialsException();
 
-        String sessionId = sessionService.createSession(user, "");
+        String sessionId = sessionService.createSession(user, "Web Browser");
 
         // generate & send back the token
         return jwtService.generateToken(user,sessionId);
@@ -190,7 +189,7 @@ public class AuthService {
     }
     //resetPass
     @Transactional
-    public void resetPassword(String token, String newPassword) {
+    public void resetPassword(Long userId, String token, String newPassword) {
         VerificationToken t = tokenRepo
                 .findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
@@ -206,6 +205,15 @@ public class AuthService {
             throw new InvalidCredentialsException();
 
         tokenRepo.delete(t);
+        sessionService.revokeAllSessions(userId);
     }
+
     //logout
+    public void logout(Long userId, String sessionId) {
+        sessionService.revokeSession(userId, sessionId);
+    }
+
+    public void logoutAll(Long userId) {
+        sessionService.revokeAllSessions(userId);
+    }
 }

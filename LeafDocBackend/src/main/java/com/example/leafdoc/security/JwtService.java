@@ -3,7 +3,6 @@ package com.example.leafdoc.security;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.Role;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Jwts;
@@ -11,19 +10,17 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
-public class jwtService {
+public class JwtService {
 
     private final SecretKey secretKey;
     private final Duration accessTokenExpiry;
 
-    public jwtService(
+    public JwtService(
             @Value("${app.jwt.secret}") String key,
             @Value("${app.jwt.expiration}") Duration expiration
     ) {
