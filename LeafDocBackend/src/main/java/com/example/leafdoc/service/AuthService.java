@@ -132,7 +132,7 @@ public class AuthService {
         User savedUser = userRepo.save(user);
         tokenRepo.delete(pending);
 
-        String sessionId = sessionService.createSession(user, "Web Browser");
+        String sessionId = sessionService.createSession(savedUser, "Web Browser");
 
         // need jwt here cause I'm doing auto log in. (return jwt for auto login)
         return jwtService.generateToken(savedUser, sessionId);
