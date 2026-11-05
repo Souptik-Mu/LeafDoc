@@ -3,7 +3,6 @@ package com.example.leafdoc.security;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.Role;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
 import io.jsonwebtoken.Jwts;
@@ -11,19 +10,17 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 
 @Service
-public class jwtService {
+public class JwtService {
 
     private final SecretKey secretKey;
     private final Duration accessTokenExpiry;
 
-    public jwtService(
+    public JwtService(
             @Value("${app.jwt.secret}") String key,
             @Value("${app.jwt.expiration}") Duration expiration
     ) {
@@ -36,15 +33,22 @@ public class jwtService {
     }
 
 
-    /// jwt contains : userId(as subject), role, iat(issued at), exp
+    /// jwt contains : userId(as subject), sessionId(as id), role, iat(issued at), exp
+     public record TokenData(
+             Long userId,
+             String sessionId,
+             Role role
+     ) {}
+
     public String generateToken(
-            User user
+            User user,
+            String sessionId
     ){
         Instant now = Instant.now();
 
-                //.claim("userId", uId) //| to extract> return extractAllClaims(token).get("userId", Long.class);
         return Jwts.builder()
-                .subject(user.getId().toString())  // | to extract> extractAllClaims(token).getSubject();
+                .subject(user.getId().toString())
+                .id(sessionId) // jti (JWT ID)
                 .claim("role", user.getRole().name())
                 .issuedAt(Date.from(now))
                 .expiration(
@@ -55,33 +59,37 @@ public class jwtService {
                 .signWith(secretKey)
                 .compact();
     }
-    public boolean isTokenValid(String token){
-        try{
-            Claims claims = extractAllClaims(token);
-            return claims.getExpiration().after(new Date());
-        }catch(JwtException | IllegalArgumentException e ){
-            return false;
-        }
-    }
 
-    private Claims extractAllClaims(String token) {
-        return Jwts.parser()
+    public TokenData parseAndValidate(String token) throws IllegalArgumentException {
+        Claims claims = Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
 
-    public Long getUserIdFromToken(String token) {
-        Claims claims = extractAllClaims(token);
-        return Long.parseLong(claims.getSubject());
-    }
+        String subject = claims.getSubject();
+        String sessionId = claims.getId();
+        String roleValue = claims.get("role", String.class);
+        Date expiration = claims.getExpiration();
+        Date issuedAt = claims.getIssuedAt();
 
-    public Role getRoleFromToken(String token) {
+        if (
+                     subject == null || subject.isBlank()
+                || sessionId == null || sessionId.isBlank()
+                || roleValue == null || roleValue.isBlank()
+                || expiration == null
+                || issuedAt == null
+        ) {
+            throw new IllegalArgumentException("Required JWT claims are missing");
+        }
 
-        String role_str = extractAllClaims(token).get("role", String.class);
-        if(role_str != null)
-            return Role.valueOf(role_str);
-        return null;
+        Long userId = Long.parseLong(subject);
+        Role role = Role.valueOf(roleValue);
+
+        return new TokenData(
+                userId,
+                sessionId,
+                role
+        );
     }
 }

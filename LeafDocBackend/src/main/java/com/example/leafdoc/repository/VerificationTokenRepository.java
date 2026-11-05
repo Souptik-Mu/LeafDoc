@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -37,7 +38,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
         WHERE t.expiresAt <= :now
     """)
     void deleteExpiredTokens(
-            @Param("now") LocalDateTime now
+            @Param("now") Instant now
     );
 
     //* DELETE: inherited delete(token)

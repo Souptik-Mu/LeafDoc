@@ -149,8 +149,7 @@ Current `Role` enum values: `GUEST`, `USER`, `ADMIN`.
 - SameSite: `Lax`
 - Path: `/`
 - `Secure`: currently `false` in the controller cookie builders
-- Login cookie Max-Age: 1 hour
-- Email-verification cookie Max-Age: 20 minutes
+- cookie Max-Age: 24 hour (from JWT expiration)
 - JWT expiration: `app.jwt.expiration` (currently `24h`)
 
 The JWT subject contains the user ID and a `role` claim contains the user's role. The JWT filter reads the cookie and creates an `AuthenticatedUserPrincipal`.
