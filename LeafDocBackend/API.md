@@ -14,16 +14,16 @@ Technical endpoint reference generated from the supplied backend source snapshot
 
 ### 1.1 Authentication cookie
 
-| Attribute | Login | Email verification | Logout |
-|---|---|---|---|
-| Cookie | `accessToken` | `accessToken` | `accessToken` |
-| HttpOnly | `true` | `true` | `true` |
-| Secure | `false` | `false` | `false` |
-| SameSite | `Lax` | `Lax` | `Lax` |
-| Path | `/` | `/` | `/` |
-| Max-Age | 3600 seconds | 1200 seconds | 0 seconds |
+| Attribute | Login         | Email verification | Logout |
+|---|---------------|--------------------|---|
+| Cookie | `accessToken` | `accessToken`      | `accessToken` |
+| HttpOnly | `true`        | `true`             | `true` |
+| Secure | `false`       | `false`            | `false` |
+| SameSite | `Lax`         | `Lax`              | `Lax` |
+| Path | `/`           | `/`                | `/` |
+| Max-Age | 24 hours      | 24 hours           | 24 hours |
 
-The JWT itself expires according to `app.jwt.expiration` (configured as `24h`). The cookie Max-Age and JWT expiration are not currently equal.
+The JWT itself expires according to `app.jwt.expiration` (configured as `24h`). The cookie Max-Age derived from JWT expiration.
 
 The frontend must send cookies on credentialed browser requests. JavaScript cannot read the HTTP-only JWT cookie.
 
@@ -70,12 +70,12 @@ Other framework/Spring Security errors may have a different body; they are not n
 
 **Request DTO:** `RegisterRequest`
 
-| Field | Type | Required by annotations | Constraints / notes |
-|---|---|---:|---|
-| `name` | string | Yes | `@NotBlank` |
-| `email` | string | No | `@Email`; not explicitly `@NotBlank` |
-| `password` | string | No | No validation constraint in DTO |
-| `role` | enum string | No | `GUEST`, `USER`, `ADMIN`; null is not explicitly rejected by DTO |
+| Field | Type | Required by annotations | Constraints / notes                     |
+|---|---|---:|-----------------------------------------|
+| `name` | string | Yes | `@NotBlank`                             |
+| `email` | string | No | `@Email`, `@NotBlank`                   |
+| `password` | string | No | No validation constraint in DTO         |
+| `role` | enum string | No | `GUEST`, `USER`, `ADMIN`; `@NotBlank`   |
 
 **Example request**
 
@@ -174,32 +174,6 @@ GET /api/auth/verify-email?token=<raw-verification-token>
 
 **Errors:** missing/unknown/expired token is represented by `InvalidCredentialsException` (401). The source does not define a separate invalid-token response.
 
-### 2.4 Resend verification
-
-| Property | Value |
-|---|---|
-| Method | `POST` |
-| Path | `/auth/resend-verification` |
-| Authentication | **Required by current SecurityConfig** |
-| Content-Type | `application/json` |
-| Success | `202 Accepted`, empty body |
-| Implementation status | Placeholder only |
-
-**Request DTO:** `RegisterRequest` (same fields and validation as [Register](#21-register)).
-
-**Example request**
-
-```json
-{
-  "name": "Alex Green",
-  "email": "alex@example.com",
-  "password": "SecurePass123",
-  "role": "USER"
-}
-```
-
-The controller currently returns 202 without invoking the service or sending a verification email. This endpoint is not a functional resend operation in this snapshot.
-
 ### 2.5 Forgot password
 
 | Property | Value |
@@ -289,18 +263,18 @@ Fields are `userId` (number) and `role` (enum string: `GUEST`, `USER`, `ADMIN`).
 
 ### 2.8 Logout
 
-| Property | Value |
-|---|---|
-| Method | `POST` |
-| Path | `/auth/logout` |
-| Authentication | Required |
-| Request body | None |
-| Success | `204 No Content` |
+| Property | Value                       |
+|---|-----------------------------|
+| Method | `GET`                       |
+| Path | `/auth/logout`              |
+| Authentication | Required                    |
+| Request body | None                        |
+| Success | `204 No Content`            |
 | Response side effect | Clears `accessToken` cookie |
 
 **Success response:** empty body. The response sets an empty `accessToken` cookie with Max-Age=0, HttpOnly=true, SameSite=Lax, Path=/, Secure=false.
 
-**Note:** logout is client-cookie deletion only. The current implementation does not revoke the JWT server-side.
+**Note:** logout is client-cookie deletion only. And Revokes the session.
 
 ## 3. Plant APIs
 

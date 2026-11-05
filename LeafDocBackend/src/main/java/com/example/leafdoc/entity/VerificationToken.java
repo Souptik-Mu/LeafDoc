@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name= "tokens")
@@ -20,11 +20,11 @@ public class VerificationToken {
     @Column(name = "verification_token_hash", nullable = false, unique = true)
     private String verificationTokenHash;
     @Column(name="created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
     @Column(name="expires_at", nullable = false, updatable = false)
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
     @Column(nullable = false)
-    private String serialisedData;
+    private String serialisedData;  //Stores the registrationPayload after serialization.
 
 }

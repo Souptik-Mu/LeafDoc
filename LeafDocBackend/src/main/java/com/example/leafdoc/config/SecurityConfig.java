@@ -1,6 +1,6 @@
 package com.example.leafdoc.config;
 
-import com.example.leafdoc.security.jwtAuthFilter;
+import com.example.leafdoc.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -18,9 +18,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity // @PreAuthorize("hasRole('ADMIN')") -< can be dome in functions
 public class SecurityConfig {
 
-    private final jwtAuthFilter jwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
 
-    public SecurityConfig(jwtAuthFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
@@ -42,8 +42,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/register",
-                                "/auth/login",
                                 "/auth/verify-email",
+                                "/auth/login",
                                 "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/ml/test"
