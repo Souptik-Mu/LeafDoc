@@ -31,6 +31,19 @@ class Server:
             Exception,
             self._defaultExceptionHandler,
         )
+        #self.app.add_middleware()
+
+# @self.app.middleware("http") #DEBUG - shows the incoming request in detail
+# async def log_request(request: Request, call_next):
+#     print("\n========== INCOMING REQUEST ==========")
+#     print("Method:", request.method)
+#     print("URL:", request.url)
+#     print("Path:", request.url.path)
+#     print("Headers:", dict(request.headers))
+#     response = await call_next(request)
+#     print("Response status:", response.status_code)
+#     print("======================================\n")
+#     return response
 
     def _configure_routes(self):
         self.app.add_api_route(
@@ -134,11 +147,12 @@ class Server:
             "authentication": "Valid",
         }
 
-    async def get(self) -> dict:
-        return {
-            "msg": "Hello from ML service",
-            "status": "Connected",
-        }
+    async def get(self) -> dict[str, str]:
+     return {
+        "msg": "Hello from ml service. ",
+        "status": "Connected",
+        "authorization": "unknown"
+    }
     def start(self) -> None:
         uvicorn.run(
             self.app,
