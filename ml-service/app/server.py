@@ -1,4 +1,3 @@
-
 import uvicorn
 import cv2 as cv
 
@@ -92,13 +91,6 @@ class Server:
         _: None = Depends(_validate_service_key),
     ) -> Response:
 
-        if file.content_type not in config.ALLOWED_TYPES:
-            await file.close()
-            raise HTTPException(
-                status_code=400,
-                detail="Only JPEG and PNG images are allowed",
-            )
-
         data = await file.read()
         await file.close()
 
@@ -106,12 +98,6 @@ class Server:
             raise HTTPException(
                 status_code=400,
                 detail="Uploaded file is empty",
-            )
-
-        if len(data) > config.MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=413,
-                detail="Image exceeds the 5 MB size limit",
             )
 
         try:
@@ -140,7 +126,7 @@ class Server:
     async def health(
         self,
         _: None = Depends(_validate_service_key),
-    ) -> dict:
+    ) -> dict[str,str]:
         return {
             "service": "LeafDoc ML Service",
             "status": "Connected",
