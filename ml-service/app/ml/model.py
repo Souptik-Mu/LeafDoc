@@ -53,7 +53,7 @@ class PlantDiseaseModel:
             ),
         ])
 
-    def predict(self, image: Image.Image) -> dict:
+    def predict(self, image: Image.Image) -> dict[str,str]:
         # Ensure the image has three color channels
         image = image.convert("RGB")
 
@@ -74,9 +74,11 @@ class PlantDiseaseModel:
         crop = crop.replace("_", " ").replace(",", "")
         disease = disease.replace("_", " ").strip()
 
+        confidance_percentage : int = round(confidence.item() *100) #softmax
+
         return {
             "crop": crop,
             "disease": disease,
-            "confidence": round(confidence.item(), 4),
+            "confidence": str(confidance_percentage),
         }
 
