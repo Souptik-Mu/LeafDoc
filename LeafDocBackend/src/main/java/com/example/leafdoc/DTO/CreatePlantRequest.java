@@ -1,10 +1,9 @@
-package com.example.leafdoc.DTO.plant;
+package com.example.leafdoc.DTO;
 
 import com.example.leafdoc.enums.CropType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 
 public record CreatePlantRequest(
         @NotBlank @Size(max = 20)

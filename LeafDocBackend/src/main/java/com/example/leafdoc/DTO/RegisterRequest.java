@@ -1,4 +1,4 @@
-package com.example.leafdoc.DTO.auth;
+package com.example.leafdoc.DTO;
 
 import com.example.leafdoc.enums.Role;
 import jakarta.validation.constraints.*;

@@ -1,8 +1,8 @@
 package com.example.leafdoc.service;
 
 import com.example.leafdoc.DTO.ImageResponse;
-import com.example.leafdoc.DTO.plant.CreatePlantRequest;
-import com.example.leafdoc.DTO.plant.PlantResponse;
+import com.example.leafdoc.DTO.CreatePlantRequest;
+import com.example.leafdoc.DTO.PlantResponse;
 import com.example.leafdoc.client.ImageStorageClient;
 import com.example.leafdoc.entity.Plant;
 import com.example.leafdoc.entity.PlantImage;
