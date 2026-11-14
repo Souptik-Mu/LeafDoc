@@ -1,0 +1,464 @@
+{
+  "catalogVersion": "1.0",
+
+  "crops": [
+    {
+      "code": "TOMATO",
+      "name": "Tomato"
+    },
+    {
+      "code": "POTATO",
+      "name": "Potato"
+    },
+    {
+      "code": "PEPPER",
+      "name": "Pepper"
+    }
+  ],
+
+  "diseases": [
+
+    {
+      "cropCode": "TOMATO",
+      "mlClassLabel": "Tomato___healthy",
+      "name": "Healthy Tomato",
+      "description": "A healthy tomato plant with normal green foliage and no visible symptoms of disease.",
+      "symptoms": [
+        "Leaves are uniformly green and normally shaped.",
+        "Stems are strong and upright.",
+        "No unusual leaf spots, mold, or lesions.",
+        "Normal plant growth and development."
+      ],
+      "causes": [],
+      "treatment": [
+        "No disease treatment is necessary."
+      ],
+      "prevention": [
+        "Use healthy seeds and disease-free seedlings.",
+        "Maintain proper watering and soil drainage.",
+        "Provide adequate sunlight and air circulation."
+      ],
+      "careTips": [
+        "Continue regular plant monitoring.",
+        "Water at the base of the plant.",
+        "Apply balanced fertilizer according to crop requirements."
+      ],
+      "isHealthy": true
+    },
+    {
+      "cropCode": "TOMATO",
+      "mlClassLabel": "Tomato___Early_blight",
+      "name": "Early Blight",
+      "description": "Early blight is a fungal disease of tomato caused primarily by Alternaria solani. It usually begins on older, lower leaves and can spread to stems and fruits. The disease is favored by warm, humid weather, rainfall, and prolonged leaf wetness. Severe infections cause defoliation and reduced fruit production.",
+      "symptoms": [
+        "Small brown or dark spots appear on older lower leaves.",
+        "Spots develop characteristic concentric rings resembling a target or bull's-eye.",
+        "Yellow halos may develop around infected areas.",
+        "Leaf spots enlarge and merge, causing leaves to turn yellow and die.",
+        "Dark, sunken lesions may develop on stems.",
+        "Fruits may develop dark, leathery spots, often near the stem attachment."
+      ],
+      "causes": [
+        "Caused primarily by the fungus Alternaria solani.",
+        "The fungus survives in infected plant debris and may be carried on seeds or transplants.",
+        "Spores spread through wind, rain splash, and overhead irrigation.",
+        "Warm temperatures, high humidity, and prolonged leaf wetness favor infection.",
+        "Nutrient stress and weakened plants can increase disease severity."
+      ],
+      "treatment": [
+        "Remove and destroy infected lower leaves when practical.",
+        "Apply an appropriate fungicide registered for tomato early blight according to its label.",
+        "Fungicides containing active ingredients such as mancozeb or azoxystrobin may be options where locally registered.",
+        "Repeat protective treatments only at label-specified intervals when disease pressure requires them.",
+        "Maintain adequate plant nutrition and irrigation to reduce plant stress.",
+        "Remove severely infected plants when necessary to reduce disease spread."
+      ],
+      "prevention": [
+        "Use certified disease-free seeds and healthy transplants.",
+        "Practice crop rotation with non-solanaceous crops.",
+        "Remove infected plant debris after harvesting.",
+        "Avoid overhead irrigation and unnecessary leaf wetness.",
+        "Maintain adequate spacing between plants for air circulation.",
+        "Use mulch to reduce soil splash onto lower leaves.",
+        "Choose early-blight-tolerant tomato varieties where available."
+      ],
+      "careTips": [
+        "Inspect older and lower leaves regularly for circular brown lesions.",
+        "Remove infected leaves without unnecessarily damaging healthy foliage.",
+        "Water plants near their roots, preferably in the morning.",
+        "Avoid excessive nitrogen fertilization.",
+        "Keep the growing area free of infected plant debris.",
+        "Monitor nearby potato and tomato plants for similar symptoms."
+      ],
+      "isHealthy": false
+    },
+    {
+      "cropCode": "TOMATO",
+      "mlClassLabel": "Tomato___Late_blight",
+      "name": "Late Blight",
+      "description": "Late blight is a destructive disease caused by the oomycete Phytophthora infestans. It affects tomato leaves, stems, and fruits and can destroy plants rapidly under cool, humid, and wet conditions. The disease spreads through airborne and water-dispersed spores and can cause severe crop losses.",
+      "symptoms": [
+        "Large, irregular, water-soaked pale green or dark green lesions appear on leaves.",
+        "Lesions rapidly turn brown or black as infected tissue dies.",
+        "White, downy fungal-like growth may appear along lesion margins on the underside of leaves during humid weather.",
+        "Dark brown or black lesions develop on stems and petioles.",
+        "Green and ripe fruits develop firm, irregular brown or greenish-brown patches.",
+        "Infected leaves rapidly wither and may remain attached to the plant.",
+        "The disease can spread quickly throughout the crop."
+      ],
+      "causes": [
+        "Caused by the oomycete Phytophthora infestans.",
+        "The pathogen spreads through airborne spores and rain or irrigation splash.",
+        "Infected potato tubers, volunteer plants, and infected plant material can act as sources of infection.",
+        "Cool temperatures combined with high humidity and prolonged leaf wetness favor disease development.",
+        "Dense planting and poor air circulation encourage rapid disease spread."
+      ],
+      "treatment": [
+        "Remove and safely destroy infected plants or heavily infected plant parts.",
+        "Avoid moving infected plant material through healthy crop areas.",
+        "Apply an appropriate late-blight fungicide registered for tomato.",
+        "Protectant fungicides such as mancozeb may be used where registered and appropriate.",
+        "Other locally registered late-blight products may be needed under severe disease pressure.",
+        "Follow pesticide label instructions and rotate fungicides with different modes of action to reduce resistance development.",
+        "Do not compost heavily infected plant material unless an effective disease-destruction process is available."
+      ],
+      "prevention": [
+        "Use healthy seedlings and disease-free planting material.",
+        "Avoid planting tomatoes close to infected potato crops.",
+        "Remove volunteer potato and tomato plants.",
+        "Maintain adequate spacing and good air circulation.",
+        "Avoid overhead irrigation, especially during humid weather.",
+        "Monitor crops closely during rainy and cloudy periods.",
+        "Use resistant or tolerant varieties where available.",
+        "Remove infected crop residues after harvest."
+      ],
+      "careTips": [
+        "Inspect leaves and stems frequently, especially after rainfall.",
+        "Pay attention to rapidly expanding water-soaked lesions.",
+        "Water at the base of plants and avoid wetting foliage.",
+        "Remove severely infected plants promptly.",
+        "Clean hands and tools after handling infected plants.",
+        "Seek local agricultural advice immediately if late blight is suspected because the disease can spread rapidly."
+      ],
+      "isHealthy": false
+    },
+    {
+      "cropCode": "TOMATO",
+      "mlClassLabel": "Tomato___Leaf_Mold",
+      "name": "Leaf Mold",
+      "description": "Tomato leaf mold is a fungal disease caused by Passalora fulva, formerly known as Cladosporium fulvum. It primarily affects tomato foliage and is especially common in greenhouses and humid growing environments. High relative humidity and poor air circulation encourage fungal growth, causing leaf discoloration, mold development, and premature leaf death.",
+      "symptoms": [
+        "Pale green or yellowish spots appear on the upper surfaces of older leaves.",
+        "Olive-green, gray, or brown velvety mold develops on the corresponding lower leaf surfaces.",
+        "Leaf spots enlarge and may merge into larger yellow or brown areas.",
+        "Infected leaves gradually turn brown, wither, and die.",
+        "Severely affected leaves may remain attached to the plant.",
+        "In severe cases, blossoms and fruits may also become infected."
+      ],
+      "causes": [
+        "Caused by the fungus Passalora fulva.",
+        "High relative humidity, especially above 85%, strongly favors disease development.",
+        "Poor ventilation and dense plant growth encourage infection.",
+        "Fungal spores spread through air currents, water splash, contaminated tools, and plant handling.",
+        "The pathogen can survive on infected plant debris and may be carried on seeds."
+      ],
+      "treatment": [
+        "Remove and destroy infected leaves when practical.",
+        "Improve ventilation and reduce humidity around the plants.",
+        "Avoid overhead watering and prolonged leaf wetness.",
+        "Apply an appropriate fungicide registered for tomato leaf mold if necessary.",
+        "Use fungicide products according to local agricultural recommendations and label instructions.",
+        "Clean tools and growing structures that may carry fungal spores.",
+        "Prioritize humidity management because fungicides alone may not adequately control the disease."
+      ],
+      "prevention": [
+        "Maintain good ventilation in greenhouses and growing structures.",
+        "Space tomato plants properly to improve air circulation.",
+        "Use resistant tomato varieties where available.",
+        "Use healthy seeds and disease-free transplants.",
+        "Avoid excessive watering and maintain appropriate irrigation schedules.",
+        "Remove old and infected plant debris.",
+        "Keep relative humidity below levels that favor fungal development."
+      ],
+      "careTips": [
+        "Check the undersides of older leaves regularly for olive-colored mold.",
+        "Prune excessive foliage to improve airflow.",
+        "Avoid handling plants when foliage is wet.",
+        "Remove infected leaves carefully and dispose of them safely.",
+        "Monitor humidity levels, especially in greenhouses.",
+        "Keep tools and growing equipment clean."
+      ],
+      "isHealthy": false
+    },
+    {
+      "cropCode": "TOMATO",
+      "mlClassLabel": "Tomato___Septoria_leaf_spot",
+      "name": "Septoria Leaf Spot",
+      "description": "Septoria leaf spot is a fungal disease caused by Septoria lycopersici. It primarily affects tomato foliage, beginning with older lower leaves and progressing upward under favorable conditions. The disease is favored by warm, wet, and humid weather and can cause severe defoliation and reduced fruit quality.",
+      "symptoms": [
+        "Numerous small, circular spots appear on older lower leaves.",
+        "Spots have grayish-white or tan centers with dark brown margins.",
+        "Tiny black dots may be visible inside the centers of lesions.",
+        "Yellowing develops around infected areas.",
+        "Individual spots may merge, causing large areas of damaged leaf tissue.",
+        "Severely infected leaves turn yellow, dry out, and fall prematurely.",
+        "Fruit infection is uncommon, but severe defoliation can expose fruits to sunscald."
+      ],
+      "causes": [
+        "Caused by the fungus Septoria lycopersici.",
+        "The fungus survives in infected tomato debris and may survive on susceptible weed hosts.",
+        "Spores spread through rain splash, overhead irrigation, wind-driven water, and contaminated tools.",
+        "Warm temperatures and prolonged leaf wetness encourage infection.",
+        "Dense planting and poor air circulation increase disease severity."
+      ],
+      "treatment": [
+        "Remove infected lower leaves as soon as symptoms are noticed.",
+        "Apply an appropriate fungicide registered for Septoria leaf spot on tomato.",
+        "Protectant fungicides such as mancozeb or chlorothalonil may be options where locally registered.",
+        "Apply treatments according to product label instructions and recommended intervals.",
+        "Avoid overhead irrigation to reduce further infection.",
+        "Remove severely infected plant material and dispose of it safely.",
+        "Maintain balanced plant nutrition to support healthy growth."
+      ],
+      "prevention": [
+        "Use healthy seeds and disease-free transplants.",
+        "Practice crop rotation and avoid planting tomatoes in the same location repeatedly.",
+        "Remove infected plant debris after harvest.",
+        "Use mulch to prevent soil and water from splashing onto leaves.",
+        "Maintain sufficient spacing between plants.",
+        "Water at the base of plants rather than over the foliage.",
+        "Control susceptible weeds around the growing area."
+      ],
+      "careTips": [
+        "Inspect older leaves frequently for small circular spots.",
+        "Remove infected lower leaves when practical.",
+        "Avoid working among wet plants.",
+        "Maintain good airflow through regular pruning and proper spacing.",
+        "Monitor neighboring tomato plants for new infections.",
+        "Clean gardening tools after removing infected foliage."
+      ],
+      "isHealthy": false
+    },
+
+
+    {
+      "cropCode": "POTATO",
+      "mlClassLabel": "Potato___healthy",
+      "name": "Healthy Potato",
+      "description": "A healthy potato plant with normal green foliage, strong stems, and no visible signs of fungal or bacterial disease.",
+      "symptoms": [
+        "Leaves are uniformly green and normally developed.",
+        "Stems are strong and upright.",
+        "No unusual leaf spots, lesions, or mold growth.",
+        "Normal vegetative growth and development."
+      ],
+      "causes": [],
+      "treatment": [
+        "No disease treatment is necessary."
+      ],
+      "prevention": [
+        "Use certified disease-free seed potatoes.",
+        "Maintain well-drained soil.",
+        "Practice crop rotation.",
+        "Provide appropriate irrigation and balanced nutrition."
+      ],
+      "careTips": [
+        "Continue regular plant monitoring.",
+        "Avoid waterlogging.",
+        "Maintain proper soil moisture.",
+        "Inspect foliage regularly for disease symptoms."
+      ],
+      "isHealthy": true
+    },
+    {
+      "cropCode": "POTATO",
+      "mlClassLabel": "Potato___Early_blight",
+      "name": "Early Blight",
+      "description": "Potato early blight is a fungal disease caused primarily by Alternaria solani. It commonly affects older leaves first and can spread to stems and tubers. The disease is favored by warm temperatures, alternating wet and dry conditions, and plant stress. Severe infections cause premature leaf death and reduced tuber yield.",
+      "symptoms": [
+        "Small brown or dark spots initially appear on older lower leaves.",
+        "Spots gradually enlarge and develop concentric rings resembling a bull's-eye.",
+        "Yellow areas may develop around the lesions.",
+        "Infected leaves turn yellow, dry out, and die.",
+        "Severe infections cause premature defoliation.",
+        "Dark lesions may develop on stems.",
+        "Infected tubers may develop dark, sunken, irregular lesions with dry, corky tissue underneath."
+      ],
+      "causes": [
+        "Caused primarily by the fungus Alternaria solani.",
+        "The pathogen survives in infected crop debris and may persist on susceptible weed hosts.",
+        "Spores spread through wind and rain splash.",
+        "Warm weather, leaf wetness, and high humidity encourage disease development.",
+        "Nutrient deficiencies, drought stress, and aging foliage can increase susceptibility.",
+        "Infected seed tubers and contaminated plant material can contribute to disease spread."
+      ],
+      "treatment": [
+        "Remove heavily infected foliage where practical.",
+        "Maintain adequate irrigation and balanced fertilization.",
+        "Apply an appropriate fungicide registered for potato early blight.",
+        "Fungicides containing mancozeb or azoxystrobin may be options where locally registered.",
+        "Follow label instructions and rotate fungicides with different modes of action.",
+        "Remove infected plant debris after harvesting.",
+        "Harvest carefully to minimize tuber injury and infection."
+      ],
+      "prevention": [
+        "Plant certified disease-free seed potatoes.",
+        "Practice crop rotation with non-solanaceous crops.",
+        "Remove volunteer potato plants and infected crop residues.",
+        "Maintain balanced soil fertility, especially adequate nitrogen.",
+        "Avoid excessive irrigation and prolonged leaf wetness.",
+        "Maintain good plant spacing and air circulation.",
+        "Choose early-blight-tolerant potato varieties where available."
+      ],
+      "careTips": [
+        "Inspect older leaves regularly for concentric brown spots.",
+        "Monitor crops more frequently during warm and humid weather.",
+        "Avoid water stress and maintain consistent soil moisture.",
+        "Remove diseased foliage without spreading contaminated material.",
+        "Inspect harvested tubers for dark, sunken lesions.",
+        "Store healthy tubers under suitable storage conditions."
+      ],
+      "isHealthy": false
+    },
+    {
+      "cropCode": "POTATO",
+      "mlClassLabel": "Potato___Late_blight",
+      "name": "Late Blight",
+      "description": "Potato late blight is a highly destructive disease caused by the oomycete Phytophthora infestans. It affects leaves, stems, and tubers and spreads rapidly during cool, humid, and rainy weather. Severe infections can destroy potato foliage and cause extensive tuber losses in the field and during storage.",
+      "symptoms": [
+        "Small, water-soaked, pale green or dark green lesions appear on leaves.",
+        "Lesions rapidly enlarge and turn brown, purple-brown, or black.",
+        "White downy growth may appear on the underside of leaves near lesion margins during humid conditions.",
+        "Dark brown or black lesions develop on stems and petioles.",
+        "Infected foliage wilts, collapses, and may die rapidly.",
+        "Tuber surfaces develop irregular purplish-brown or dark lesions.",
+        "Cut tubers may show reddish-brown or rusty-colored internal tissue extending inward from the surface.",
+        "Infected tubers may develop secondary rots during storage."
+      ],
+      "causes": [
+        "Caused by the oomycete Phytophthora infestans.",
+        "The pathogen survives primarily in infected potato tubers and other living host material.",
+        "Spores spread through wind, rain splash, and irrigation water.",
+        "Cool temperatures, high humidity, and prolonged leaf wetness favor infection.",
+        "Volunteer potato plants and infected seed tubers can act as sources of disease.",
+        "Poor drainage and excessive moisture can increase disease pressure."
+      ],
+      "treatment": [
+        "Remove and destroy infected plants and affected plant material safely.",
+        "Apply an appropriate late-blight fungicide registered for potato cultivation.",
+        "Protectant products such as mancozeb or copper-based fungicides may be options where locally registered.",
+        "Other locally registered late-blight products may be needed when disease pressure is high.",
+        "Follow regional agricultural recommendations and product label instructions.",
+        "Rotate fungicides with different modes of action to reduce resistance development.",
+        "Avoid storing visibly infected tubers.",
+        "Harvest and store healthy tubers carefully to reduce mechanical damage and secondary infection."
+      ],
+      "prevention": [
+        "Use certified disease-free seed potatoes.",
+        "Plant resistant or tolerant varieties where available.",
+        "Remove volunteer potato plants and infected tubers.",
+        "Practice crop rotation and field sanitation.",
+        "Ensure proper drainage and avoid waterlogging.",
+        "Avoid excessive overhead irrigation.",
+        "Monitor weather conditions and disease forecasts.",
+        "Destroy infected crop residues and cull piles appropriately."
+      ],
+      "careTips": [
+        "Inspect fields regularly, especially after rainfall and during prolonged cloudy weather.",
+        "Check lower leaves and areas with poor drainage first.",
+        "Look for water-soaked lesions and white growth on leaf undersides.",
+        "Remove infected plants promptly and avoid moving them through healthy fields.",
+        "Do not use infected tubers as seed potatoes.",
+        "Keep harvested healthy tubers dry and store them under suitable conditions.",
+        "Seek agricultural extension advice immediately if late blight is suspected."
+      ],
+      "isHealthy": false
+    },
+
+
+    {
+      "cropCode": "PEPPER",
+      "mlClassLabel": "Pepper,_bell___healthy",
+      "name": "Healthy Pepper",
+      "description": "A healthy bell pepper plant with normal green leaves, strong stems, and no visible symptoms of bacterial or fungal infection.",
+      "symptoms": [
+        "Leaves are uniformly green and normally shaped.",
+        "Stems are strong and healthy.",
+        "No visible spots, yellowing, or unusual lesions.",
+        "Normal plant growth and development."
+      ],
+      "causes": [],
+      "treatment": [
+        "No disease treatment is necessary."
+      ],
+      "prevention": [
+        "Use healthy seeds and disease-free seedlings.",
+        "Maintain proper soil drainage.",
+        "Provide adequate sunlight and air circulation.",
+        "Avoid excessive watering and maintain balanced nutrition."
+      ],
+      "careTips": [
+        "Continue regular plant monitoring.",
+        "Water consistently at the base of plants.",
+        "Remove weeds and dead plant material.",
+        "Monitor leaves for unusual spots or discoloration."
+      ],
+      "isHealthy": true
+    },
+    {
+      "cropCode": "PEPPER",
+      "mlClassLabel": "Pepper,_bell___Bacterial_spot",
+      "name": "Bacterial Spot",
+      "description": "Bacterial spot is a serious pepper disease caused by several closely related Xanthomonas bacteria, including Xanthomonas euvesicatoria and related species. It affects leaves, stems, and fruits, producing water-soaked lesions that become brown and necrotic. The disease is favored by warm temperatures, high humidity, rainfall, and overhead irrigation.",
+      "symptoms": [
+        "Small, water-soaked spots initially appear on leaves.",
+        "Leaf spots become brown, reddish-brown, or tan with dark margins.",
+        "Lesions are often angular because their growth is restricted by leaf veins.",
+        "Pepper leaf spots generally do not develop yellow halos.",
+        "Centers of leaf lesions generally remain intact rather than falling out.",
+        "Infected leaves may become ragged, yellow in severe cases, and eventually fall.",
+        "Small raised or rough brown spots may develop on pepper fruits.",
+        "Severe infections can cause defoliation and expose fruits to sunscald."
+      ],
+      "causes": [
+        "Caused by Xanthomonas bacteria, including Xanthomonas euvesicatoria and related species.",
+        "The bacteria may be carried on or inside contaminated seeds.",
+        "Infected seedlings and transplants can introduce the disease into fields.",
+        "Rain splash, overhead irrigation, contaminated tools, and plant handling spread the bacteria.",
+        "Warm temperatures and high humidity favor bacterial multiplication and infection.",
+        "The bacteria may survive in infected crop debris and volunteer host plants."
+      ],
+      "treatment": [
+        "Remove and destroy severely infected leaves and plant material.",
+        "Avoid handling plants when they are wet.",
+        "Use copper-based bactericides registered for bacterial spot on pepper where appropriate.",
+        "Copper treatments may slow disease development but are not a guaranteed cure.",
+        "Copper-resistant bacterial populations may occur, reducing treatment effectiveness.",
+        "Use approved bactericide combinations only when permitted by the local product label.",
+        "Avoid overhead irrigation and reduce leaf wetness.",
+        "Clean and disinfect gardening tools after working with infected plants."
+      ],
+      "prevention": [
+        "Use certified pathogen-free seeds and disease-free transplants.",
+        "Choose bacterial-spot-resistant pepper varieties where available.",
+        "Practice crop rotation and avoid planting peppers repeatedly in the same location.",
+        "Avoid overhead irrigation and use drip or furrow irrigation where practical.",
+        "Maintain adequate plant spacing for air circulation.",
+        "Remove infected crop debris after harvest.",
+        "Control volunteer pepper and tomato plants.",
+        "Avoid working among wet plants to prevent bacterial transmission.",
+        "Clean tools and equipment regularly."
+      ],
+      "careTips": [
+        "Inspect leaves regularly for small angular, water-soaked spots.",
+        "Pay special attention to leaf undersides and areas affected by splashing water.",
+        "Remove severely infected leaves carefully.",
+        "Water at the base of plants, preferably in the morning.",
+        "Avoid excessive plant handling during wet weather.",
+        "Monitor developing fruits for raised, rough brown spots.",
+        "Seek local agricultural advice if bacterial spot continues spreading despite sanitation measures."
+      ],
+      "isHealthy": false
+    }
+  ]
+}

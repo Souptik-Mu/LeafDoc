@@ -1,4 +1,4 @@
-package com.example.leafdoc.DTO;
+package com.example.leafdoc.DTO.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

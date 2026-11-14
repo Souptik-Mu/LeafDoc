@@ -1,8 +1,8 @@
 package com.example.leafdoc.controllers;
 
-import com.example.leafdoc.DTO.LoginRequest;
-import com.example.leafdoc.DTO.RegisterRequest;
-import com.example.leafdoc.DTO.ResetPassRequest;
+import com.example.leafdoc.DTO.auth.LoginRequest;
+import com.example.leafdoc.DTO.auth.RegisterRequest;
+import com.example.leafdoc.DTO.auth.ResetPassRequest;
 import com.example.leafdoc.security.AuthenticatedUserPrincipal;
 import com.example.leafdoc.service.AuthService;
 import jakarta.validation.Valid;
