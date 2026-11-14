@@ -2,7 +2,7 @@ package com.example.leafdoc.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -20,7 +20,7 @@ import java.time.Instant;
 )
 @Getter
 @Setter
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class PlantImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,12 @@ public class PlantImage {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "plant_id", nullable = false, updatable = false)
+    @JoinColumn(
+            name = "plant_id",
+            nullable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(name = "fk_plant_image_plant")
+    )
     private Plant plant;
 
     @Column(name = "object_path", updatable = false, nullable = false)
@@ -38,7 +43,7 @@ public class PlantImage {
     private String contentType;
 
     @CreationTimestamp
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
 }

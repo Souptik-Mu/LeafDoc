@@ -6,45 +6,49 @@ import lombok.*;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_users_email",
+                        columnNames = "email"
+                )
+        }
+)
 @Getter
 @Setter
-@NoArgsConstructor()
+@NoArgsConstructor
 //@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class User {
-    // get back uuid(auto generated)
-    ///id (PK), name, email (unique), password_hash, role, created_at
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="user_name", nullable = false)
+    @Column(name="user_name", nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(name="email", nullable = false)
     private String email;
 
     @Column(name="password_hash", nullable = false)
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Role role;
 
     @CurrentTimestamp
-    @Column(name="created_at", nullable = false, insertable = false, updatable = false)
+    @Column(name="created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
     public User(String userName, String email, String passwordHash, Role role) {
         this.name = userName;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.role = role != null ? role : Role.GUEST;
+        this.role = role != null ? role : Role.USER;
     }
 
 }
-// have ROLE enum

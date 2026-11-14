@@ -4,10 +4,12 @@ import com.example.leafdoc.DTO.ImageResponse;
 import com.example.leafdoc.DTO.plant.CreatePlantRequest;
 import com.example.leafdoc.DTO.plant.PlantResponse;
 import com.example.leafdoc.client.ImageStorageClient;
+import com.example.leafdoc.entity.Crop;
 import com.example.leafdoc.entity.Plant;
 import com.example.leafdoc.entity.PlantImage;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.exceptions.ResourceNotFoundException;
+import com.example.leafdoc.repository.CropRepository;
 import com.example.leafdoc.repository.PlantImageRepository;
 import com.example.leafdoc.repository.PlantRepository;
 import com.example.leafdoc.util.ImageFile;
@@ -33,6 +35,7 @@ public class PlantService {
     private final ImageStorageClient imageStorageClient;
     private final PlantRepository plantRepo;
     private final PlantImageRepository plantImageRepo;
+    private final CropRepository cropRepo;
 
     public void createPlant(
             Long userId,
@@ -40,11 +43,16 @@ public class PlantService {
     ){
         /// assumes the reference is valid. doesn't load the full object.
         User user = entityManager.getReference(User.class, userId);
+        Crop crop = cropRepo.findByName( request.cropName() )
+                        .orElseThrow(() -> new IllegalArgumentException(
+                            "Invalid crop: " + request.cropName()
+                        ));;
+
 
         Plant newPlant = new Plant();
         newPlant.setUser(user);
         newPlant.setNickname(request.nickname());
-        newPlant.setCropType(request.cropType());
+        newPlant.setCrop(crop);
 
         plantRepo.save(newPlant);
     }

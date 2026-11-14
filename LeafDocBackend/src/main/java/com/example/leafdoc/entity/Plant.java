@@ -1,10 +1,12 @@
 package com.example.leafdoc.entity;
 
-import com.example.leafdoc.enums.CropType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CurrentTimestamp;
+
+import java.time.Instant;
 
 @Entity
 @Table(name="plants",
@@ -12,6 +14,12 @@ import lombok.Setter;
                 @UniqueConstraint(
                         name = "uk_plant_user_nickname",
                         columnNames = {"user_id", "nickname"}
+                )
+        },
+        indexes = {
+                @Index(
+                        name = "idx_plant_user_added_at",
+                        columnList = "user_id, added_at"
                 )
         }
 )
@@ -24,14 +32,26 @@ public class Plant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nickname", nullable = false)
+    @Column(name = "nickname", nullable = false, length = 20)
     private String nickname;
 
-    @Column(name = "crop_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private CropType cropType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "crop_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_plant_crop")
+    )
+    private Crop crop;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false) //fk
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_plant_user")
+    )
     private User user;
+
+    @CurrentTimestamp
+    @Column(name="added_at", nullable = false, updatable = false)
+    private Instant addedAt;
 }
