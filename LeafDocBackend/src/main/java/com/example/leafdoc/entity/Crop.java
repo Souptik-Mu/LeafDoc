@@ -31,6 +31,6 @@ public class Crop {     ///READ ONLY | DATA LOADED
     @Column(name="crop_name", length = 100, nullable = false)
     private String name;
 
-    @Column(name="code", length = 50, nullable = false)
+    @Column(name="code", length = 50, nullable = false, updatable = false)
     private String cropCode;
 }

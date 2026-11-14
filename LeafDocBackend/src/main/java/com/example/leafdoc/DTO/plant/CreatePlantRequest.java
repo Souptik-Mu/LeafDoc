@@ -9,7 +9,7 @@ public record CreatePlantRequest(
         @NotBlank @Size(max = 20)
         String nickname,
 
-        @NotNull
-        CropType cropType
+        @NotNull @NotBlank @Size(max = 20)
+        String cropName
 ) {
 }

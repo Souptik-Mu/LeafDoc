@@ -1,23 +1,33 @@
 package com.example.leafdoc.util;
 
-import org.springframework.boot.CommandLineRunner;
+import com.example.leafdoc.service.DiseaseCatalogImportService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
-public class DiseaseCatalogImporter implements CommandLineRunner {
-    // imports catalog/delesse-catalog.json to DB table (SEEDING)
+@Component
+@ConditionalOnProperty(
+        name = "leafdoc.catalog.import",
+        havingValue = "true"
+)
+public class DiseaseCatalogImportRunner implements ApplicationRunner {
+
+    private final DiseaseCatalogImportService importService;
+    private final boolean updateExisting;
+
+    public DiseaseCatalogImportRunner(
+            DiseaseCatalogImportService importService,
+            @Value("${leafdoc.catalog.update-existing:false}")
+            boolean updateExisting
+    ) {
+        this.importService = importService;
+        this.updateExisting = updateExisting;
+    }
+
     @Override
-    public void run(String... args) throws Exception {
-
-        // Only seed if the table is empty
-        if (diseaseRepository.count() > 0) {
-            return;
-        }
-        // read json & map to a object
-        //InputStream input = new ClassPathResource("catalog/disease-catalog.json").getInputStream();
-
-        /// the object holds the xerox of the json in object form (DTO)
-        ///
-
-        // make bulk update to db.
-
+    public void run(ApplicationArguments args) {
+        importService.importCatalog(updateExisting);
     }
 }

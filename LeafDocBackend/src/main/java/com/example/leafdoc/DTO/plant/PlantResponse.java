@@ -9,14 +9,14 @@ import jakarta.validation.constraints.NotNull;
 public record PlantResponse (
         @NotNull  Long id,
         @NotBlank String nickname,
-        @NotNull  CropType cropType,
+        @NotNull  String cropType,
         ImageResponse latestImage
 ) {
         public static PlantResponse from(Plant plant) {
                 return new  PlantResponse(
                         plant.getId(),
                         plant.getNickname(),
-                        plant.getCropType(),
+                        plant.getCrop().getName(),
                         null
                 );
         }
@@ -28,7 +28,7 @@ public record PlantResponse (
                 return new PlantResponse(
                         plant.getId(),
                         plant.getNickname(),
-                        plant.getCropType(),
+                        plant.getCrop().getName(),
                         latestImage
                 );
         }

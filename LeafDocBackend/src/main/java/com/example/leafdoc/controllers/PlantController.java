@@ -1,8 +1,8 @@
 package com.example.leafdoc.controllers;
 
-import com.example.leafdoc.DTO.CreatePlantRequest;
+import com.example.leafdoc.DTO.plant.CreatePlantRequest;
 import com.example.leafdoc.DTO.ImageResponse;
-import com.example.leafdoc.DTO.PlantResponse;
+import com.example.leafdoc.DTO.plant.PlantResponse;
 import com.example.leafdoc.security.AuthenticatedUserPrincipal;
 import com.example.leafdoc.service.PlantService;
 import jakarta.validation.Valid;

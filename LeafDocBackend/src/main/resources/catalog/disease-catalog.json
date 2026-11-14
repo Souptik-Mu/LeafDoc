@@ -17,7 +17,6 @@
   ],
 
   "diseases": [
-
     {
       "cropCode": "TOMATO",
       "mlClassLabel": "Tomato___healthy",
