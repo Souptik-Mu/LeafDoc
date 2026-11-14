@@ -1,4 +1,3 @@
-
 import uvicorn
 import cv2 as cv
 from PIL import Image
@@ -134,7 +133,7 @@ class Server:
     async def health(
         self,
         _: None = Depends(_validate_service_key),
-    ) -> dict:
+    ) -> dict[str,str]:
         return {
             "service": "LeafDoc ML Service",
             "status": "Connected",

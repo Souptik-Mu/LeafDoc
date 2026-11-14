@@ -153,9 +153,8 @@ class PlantDiseaseModel:
             ),
         ])
 
-    def predict(self, image: Image.Image) -> dict:
-
-        # Convert image to RGB
+    def predict(self, image: Image.Image) -> dict[str,str]:
+        # Ensure the image has three color channels
         image = image.convert("RGB")
 
         # Preprocess image
@@ -198,6 +197,8 @@ class PlantDiseaseModel:
 
         # Final prediction
         confidence = top_values[0].item()
+
+        confidance_percentage : int = round(confidence.item() *100) #softmax
 
         return {
             "crop": {
