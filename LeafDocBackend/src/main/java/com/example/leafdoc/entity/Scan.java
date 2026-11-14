@@ -46,28 +46,6 @@ public class Scan {
     )
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "plant_id",
-            foreignKey = @ForeignKey(name = "fk_scan_plant")
-    )
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    private Plant plant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "disease_id",
-            foreignKey = @ForeignKey(name = "fk_scan_disease")
-    )
-    private Disease disease;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "predicted_crop_id",
-            foreignKey = @ForeignKey(name = "fk_scan_predicted_crop")
-    )
-    private Crop predictedCrop; ///*
-
     @Column(
             name = "predicted_class_label",
             nullable = false,
@@ -86,9 +64,6 @@ public class Scan {
 
     @Column(name = "image_path", nullable = false, length = 500)
     private String imagePath;
-
-    @Column(name = "model_version", length = 100)
-    private String modelVersion;
 
     @CreationTimestamp
     @Column(name = "scanned_at", nullable = false, updatable = false)

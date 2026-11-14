@@ -3,6 +3,7 @@ package com.example.leafdoc.repository;
 import com.example.leafdoc.entity.Disease;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,4 +13,6 @@ public interface DiseaseRepository extends JpaRepository<Disease, Long> {
     boolean existsByMlClassLabel(String mlClassLabel);
 
     List<Disease> findAllByCrop_CropCode(String cropCode);
+
+    List<Disease> findAllByMlClassLabelIn(Collection<String> labels);
 }
