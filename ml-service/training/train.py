@@ -4,7 +4,7 @@ from pathlib import Path
 
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
 from torchvision import datasets, transforms, models
 from sklearn.model_selection import train_test_split
 
@@ -71,8 +71,8 @@ def main():
     print("Dataset path:", DATASET_DIR)
     print("Loading dataset...")
 
-    # Image transformations
-    transform = transforms.Compose([
+    # Training transformations
+    train_transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
@@ -82,16 +82,31 @@ def main():
         ),
     ])
 
-    # Load all dataset folders
-    full_dataset = datasets.ImageFolder(
+    # Validation transformations (no random augmentation)
+    val_transform = transforms.Compose([
+        transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225],
+        ),
+    ])
+
+    # Load dataset separately with different transformations
+    train_full_dataset = datasets.ImageFolder(
         root=str(DATASET_DIR),
-        transform=transform,
+        transform=train_transform,
     )
 
-    # Check that all selected classes exist
+    val_full_dataset = datasets.ImageFolder(
+        root=str(DATASET_DIR),
+        transform=val_transform,
+    )
+
+    # Check selected classes
     missing_classes = [
         name for name in CLASSES
-        if name not in full_dataset.class_to_idx
+        if name not in train_full_dataset.class_to_idx
     ]
 
     if missing_classes:
@@ -99,25 +114,28 @@ def main():
             f"Missing dataset classes: {missing_classes}"
         )
 
-    # Map selected class names to output labels 0-9
+    # Map selected classes to output labels 0-9
     class_to_new_index = {
         class_name: index
         for index, class_name in enumerate(CLASSES)
     }
 
-    # Select images belonging only to our 10 classes
+    # Select images belonging to the 10 classes
     selected_indices = [
         index
         for index, (_, original_label) in enumerate(
-            full_dataset.samples
+            train_full_dataset.samples
         )
-        if full_dataset.classes[original_label] in class_to_new_index
+        if train_full_dataset.classes[original_label]
+        in class_to_new_index
     ]
 
     # Create labels in the new 0-9 order
     selected_labels = [
         class_to_new_index[
-            full_dataset.classes[full_dataset.samples[index][1]]
+            train_full_dataset.classes[
+                train_full_dataset.samples[index][1]
+            ]
         ]
         for index in selected_indices
     ]
@@ -133,11 +151,12 @@ def main():
         stratify=selected_labels,
     )
 
-    # Dataset that returns remapped labels
+    # Custom dataset with remapped labels
     class PlantDiseaseDataset(torch.utils.data.Dataset):
 
-        def __init__(self, indices):
+        def __init__(self, indices, source_dataset):
             self.indices = indices
+            self.source_dataset = source_dataset
 
         def __len__(self):
             return len(self.indices)
@@ -146,13 +165,20 @@ def main():
             selected_position = self.indices[item]
             original_index = selected_indices[selected_position]
 
-            image, _ = full_dataset[original_index]
+            image, _ = self.source_dataset[original_index]
             label = selected_labels[selected_position]
 
             return image, label
 
-    train_dataset = PlantDiseaseDataset(train_indices)
-    val_dataset = PlantDiseaseDataset(val_indices)
+    train_dataset = PlantDiseaseDataset(
+        train_indices,
+        train_full_dataset,
+    )
+
+    val_dataset = PlantDiseaseDataset(
+        val_indices,
+        val_full_dataset,
+    )
 
     train_loader = DataLoader(
         train_dataset,
