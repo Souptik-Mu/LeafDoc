@@ -27,5 +27,4 @@ class ImageProcessor:
             or width * height > self.MAX_PIXELS
         ):
             raise ValueError("Image dimensions exceed limits")
-        #cv.typing.MatLike
         return image
