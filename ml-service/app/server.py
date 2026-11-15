@@ -15,16 +15,18 @@ from fastapi.responses import JSONResponse
 import config
 from imageProcessor import ImageProcessor
 from ml.model import PlantDiseaseModel
+from dto.types import PredictionItemDTO , PredictionResponseDTO, ModelInfoDTO
 class Server:
     def __init__(self):
         self.app = FastAPI(title=config.APP_TITLE)
         self.image_processor = ImageProcessor()
-        self.predictor = PlantDiseaseModel()
+        self.model = PlantDiseaseModel()
         self._configure_routes()
         self.app.add_exception_handler(
             Exception,
             self._defaultExceptionHandler,
         )
+        
     def _configure_routes(self):
         self.app.add_api_route(
             "/ml/predict",
@@ -41,6 +43,7 @@ class Server:
             self.health,
             methods=["GET", "POST", "OPTIONS"],
         )
+
     @staticmethod
     def _defaultExceptionHandler(
         request: Request,
@@ -54,6 +57,7 @@ class Server:
                 "msg": str(exc),
             },
         )
+    
     @staticmethod
     def _validate_service_key(
         x_ml_service_key: str = Header(...),
@@ -63,73 +67,64 @@ class Server:
                 status_code=403,
                 detail="Unauthorized access",
             )
+        
     async def predict(
         self,
         file: UploadFile = File(...),
         _: None = Depends(_validate_service_key),
     ) -> Response:
-        # 1. Validate file type
+        # Validate file type
         if file.content_type not in config.ALLOWED_TYPES:
             await file.close()
             raise HTTPException(
                 status_code=400,
                 detail="Only JPEG and PNG images are allowed",
             )
-        # 2. Read uploaded image
+        # Read uploaded image
         data = await file.read()
         await file.close()
-        # 3. Validate empty file
+        # Validate empty file
         if not data:
             raise HTTPException(
                 status_code=400,
                 detail="Uploaded file is empty",
             )
-        # 4. Validate file size
+        # Validate file size
         if len(data) > config.MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=413,
                 detail="Image exceeds the 5 MB size limit",
             )
         try:
-            # 5. Decode and validate image
+            #Decode and validate image
             image_bgr = self.image_processor.decode(data)
-            # 6. Convert BGR to RGB
             image_rgb = cv.cvtColor(
                 image_bgr,
                 cv.COLOR_BGR2RGB,
             )
             pil_image = Image.fromarray(image_rgb)
-            # 7. Run ML prediction
-            prediction_result = self.predictor.predict(pil_image)
-            # 8. Extract model information
-            model_info = prediction_result["modelInfo"]
-            # 9. Build prediction section
-            prediction_data = {
-                "crop": prediction_result["crop"],
-                "disease": prediction_result["disease"],
-                "confidenceScore": prediction_result["confidenceScore"],
-                "topPredictions": prediction_result["topPredictions"],
-            }
-            # 10. Build final response
-            response_data = {
-                "predictionStatus": "SUCCESS",
-                "imageAssessment": {
-                    "isSuitable": True,
-                    "qualityStatus": "ACCEPTABLE",
-                    "issues": [],
-                },
-                "prediction": prediction_data,
-                "modelInfo": model_info,
-            }
+            # Run ML prediction
+            prediction :list[PredictionItemDTO] = self.model.predict(pil_image)
+            model_info = ModelInfoDTO(
+                modelName=self.model.MODEL_NAME,
+                modelVersion=self.model.MODEL_VERSION,
+                inputSize=self.model.INPUT_SIZE,
+            )
+
             return JSONResponse(
                 status_code=200,
-                content=response_data,
+                content=PredictionResponseDTO(
+                    predictionStatus="SUCCESS",
+                    prediction=prediction,
+                    modelInfo=model_info,
+                ),
             )
         except ValueError as exc:
             raise HTTPException(
                 status_code=400,
                 detail=str(exc),
             ) from exc
+        
     async def health(
         self,
         _: None = Depends(_validate_service_key),
@@ -139,12 +134,14 @@ class Server:
             "status": "Connected",
             "authentication": "Valid",
         }
-    async def get(self) -> dict:
+    
+    async def get(self) -> dict[str,str]:
         return {
             "msg": "Hello from ml service.",
             "status": "Connected",
             "authorization": "unknown",
         }
+    
     def start(self) -> None:
         uvicorn.run(
             self.app,
