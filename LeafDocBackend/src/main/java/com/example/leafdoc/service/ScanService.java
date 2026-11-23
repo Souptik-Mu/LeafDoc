@@ -3,14 +3,16 @@ package com.example.leafdoc.service;
 import com.example.leafdoc.DTO.scan.DiseaseInfo;
 import com.example.leafdoc.DTO.prediction.MlPredictResponse;
 import com.example.leafdoc.DTO.prediction.PredictionItem;
+import com.example.leafdoc.DTO.scan.ScanHistoryResponse;
 import com.example.leafdoc.DTO.scan.ScanResponse;
 import com.example.leafdoc.client.ImageStorageClient;
 import com.example.leafdoc.client.MlServiceClient;
 import com.example.leafdoc.entity.Disease;
-import com.example.leafdoc.entity.Plant;
 import com.example.leafdoc.entity.Scan;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.enums.ScanStatus;
+import com.example.leafdoc.exceptions.MlServiceResponseException;
+import com.example.leafdoc.exceptions.ResourceNotFoundException;
 import com.example.leafdoc.repository.DiseaseRepository;
 import com.example.leafdoc.repository.PlantRepository;
 import com.example.leafdoc.repository.ScanRepository;
@@ -18,6 +20,9 @@ import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.util.ImageFile;
 import com.example.leafdoc.util.StoragePathGenarator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +32,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScanService {
@@ -41,7 +47,6 @@ public class ScanService {
     @Transactional
     public ScanResponse createScan(
             MultipartFile file,
-            Long plantId,
             Long uId
     ) {
 
@@ -49,8 +54,6 @@ public class ScanService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "Authenticated user not found."
                 ));
-
-        Plant plant = plantRepo.findByIdAndUserId(plantId, user.getId()).orElse(null);
 
         ImageFile image = new ImageFile(file);  // auto validates the image, if anything goes south throws tantrum(Exception)
 
@@ -61,25 +64,25 @@ public class ScanService {
             String publicUrl = imageStorageClient.upload(image, path);
             uploaded = true;
             MlPredictResponse resp = mlClient.predict(image);
-            List<PredictionItem> sortedPredictions =
-                    resp.prediction().stream()
-//                        .filter(p -> p.confidenceScore()
-//                                .compareTo(new BigDecimal("0.75")) > 0
-//                        )
-                            .sorted(Comparator.comparing(
-                                    PredictionItem::confidenceScore
-                            ).reversed())
-                            .toList();
 
-            PredictionItem prediction =  sortedPredictions.getFirst();//temp ; also get status
+            PredictionItem prediction = resp.prediction().stream()
+                    .max(Comparator.comparing(PredictionItem::confidenceScore))
+                    .orElseThrow(() -> new MlServiceResponseException("Missing prediction."));
 
             Disease disease = diseaseRepo.findByMlClassLabel(prediction.mlClassLabel()).orElse(null);
 
             Scan scan = new Scan();
             scan.setUser(user);
+            scan.setDisease(disease);
             scan.setPredictedClassLabel(prediction.mlClassLabel());
             scan.setConfidence(prediction.confidenceScore());
             scan.setImagePath(path);
+            scan.setTitle(
+                    disease != null
+                            ? disease.getName()
+                            : "Unknown diagnosis"
+            );
+
             if(disease == null)
                 scan.setStatus(ScanStatus.UNSUPPORTED);
             else if(prediction.confidenceScore().compareTo(new BigDecimal("0.75")) < 0)
@@ -88,29 +91,62 @@ public class ScanService {
                 scan.setStatus(ScanStatus.HEALTHY);
             else scan.setStatus(ScanStatus.DISEASE_DETECTED);
 
-            scan = scanRepo.save(scan);
+            scan = scanRepo.saveAndFlush(scan);
             persisted = true;
 
-            // return the public image url, desease info, scan status
-            return new ScanResponse(
-                    disease.getCrop().getName(),
-                    DiseaseInfo.from(disease),
-                    scan.getStatus(),
-                    disease.isHealthy(),
-                    publicUrl
-            );
-
+            return ScanResponse.from(scan, disease, publicUrl);
 
         } catch (RuntimeException ex) {
 
             if (uploaded && !persisted) {
                 imageStorageClient.delete(path);
             }
-
+            log.error(
+                    "Scan processing failed. userId={}, path={}",
+                    uId,
+                    path,
+                    ex
+            );
             throw ex;
         }
     }
     // get scan history
+    @Transactional(readOnly = true)
+    public Page<ScanHistoryResponse> getScanHistory(
+            Long userId,
+            Pageable pageable
+    ) {
+        return scanRepo
+                .findAllByUser_IdOrderByCreatedAtDesc(userId, pageable)
+                .map(ScanHistoryResponse::from);
+    }
     // get scan details
+    @Transactional(readOnly = true)
+    public ScanResponse getScanDetails(
+            Long scanId,
+            Long userId
+    ) {
+        Scan scan = scanRepo.findByIdAndUser_Id(scanId, userId)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        Disease disease = scan.getDisease();
+
+        return ScanResponse.from(
+                scan,
+                disease,
+                imageStorageClient.getPublicImageUrl(scan.getImagePath())
+        );
+
+    }
     // scan delete
+    @Transactional
+    public void deleteScan(Long scanId, Long userId) {
+
+        Scan scan = scanRepo.findByIdAndUser_Id(scanId, userId)
+                .orElseThrow(ResourceNotFoundException::new);
+
+        imageStorageClient.delete(scan.getImagePath());
+
+        scanRepo.delete(scan);
+    }
 }

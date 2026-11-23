@@ -1,6 +1,7 @@
 package com.example.leafdoc.repository;
 
 import com.example.leafdoc.entity.Disease;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DiseaseRepository extends JpaRepository<Disease, Long> {
+    @EntityGraph(attributePaths = {"crop"})
     Optional<Disease> findByMlClassLabel(String mlClassLabel);
 
     boolean existsByMlClassLabel(String mlClassLabel);
