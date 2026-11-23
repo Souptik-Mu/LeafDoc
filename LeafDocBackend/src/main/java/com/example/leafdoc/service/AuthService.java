@@ -1,13 +1,15 @@
 package com.example.leafdoc.service;
 
 import com.example.leafdoc.enums.Role;
-import com.example.leafdoc.util.PendingRegistrationPayload;
+import com.example.leafdoc.DTO.auth.token.PasswordResetPayload;
+import com.example.leafdoc.DTO.auth.token.PendingRegistrationPayload;
 import com.example.leafdoc.entity.VerificationToken;
 import com.example.leafdoc.entity.User;
 import com.example.leafdoc.exceptions.InvalidCredentialsException;
 import com.example.leafdoc.repository.VerificationTokenRepository;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.security.JwtService;
+import com.example.leafdoc.DTO.auth.token.TokenData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,7 +94,6 @@ public class AuthService {
                 objectMapper.writeValueAsString(payload)
         );
 
-
         tokenRepo.save(token);
         String link = UriComponentsBuilder
                 .fromUriString(frontendUrl)
@@ -117,17 +118,21 @@ public class AuthService {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
-        PendingRegistrationPayload payload = objectMapper.readValue(
+        TokenData data = objectMapper.readValue(
                 pending.getSerialisedData(),
-                PendingRegistrationPayload.class
+                TokenData.class
         );
+
+        if (!(data instanceof PendingRegistrationPayload(String name, String email, String passwordHash, Role role))) {
+            throw new InvalidCredentialsException();
+        }
 
         User user = new User();
 
-        user.setName(payload.name());
-        user.setEmail(payload.email());
-        user.setPasswordHash( payload.passwordHash() );
-        user.setRole(payload.role());
+        user.setName(name);
+        user.setEmail(email);
+        user.setPasswordHash(passwordHash);
+        user.setRole(role);
 
         User savedUser = userRepo.save(user);
         tokenRepo.delete(pending);
@@ -164,12 +169,15 @@ public class AuthService {
         Instant now = Instant.now();
         VerificationToken token = new VerificationToken();
 
-        //token.setType(TokenType.PASSWORD_RESET);
+        PasswordResetPayload payload = new PasswordResetPayload(
+                user.getEmail()
+        );
+
         token.setVerificationTokenHash( hashToken(rawToken) );
         token.setCreatedAt(now);
         token.setExpiresAt(now.plus(15, ChronoUnit.MINUTES));
         token.setSerialisedData(
-                objectMapper.writeValueAsString(user.getEmail())
+                objectMapper.writeValueAsString(payload)
         );
 
         tokenRepo.save(token);
@@ -198,7 +206,14 @@ public class AuthService {
             throw new InvalidCredentialsException(); // InvalidTokenException();
         }
 
-        String email =  objectMapper.readValue(t.getSerialisedData(), String.class);
+        TokenData data = objectMapper.readValue(
+                t.getSerialisedData(),
+                TokenData.class
+        );
+
+        if (!(data instanceof PasswordResetPayload(String email))) {
+            throw new InvalidCredentialsException();
+        }
 
         int updated = userRepo.updatePasswordHash( email, passwordEncoder.encode(newPassword) );
         if (updated != 1)
