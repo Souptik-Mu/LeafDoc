@@ -15,7 +15,8 @@ public record ScanResponse(
         String imageUrl,
         Instant createdAt
 ) {
-    public static ScanResponse from(Scan scan, Disease disease, String publicImageUrl) {
+    public static ScanResponse from(Scan scan, String publicImageUrl) {
+        Disease disease = scan.getDisease();
         return  new ScanResponse(
                 disease == null ? null : disease.getCrop().getName(),
                 DiseaseInfo.from(disease),

@@ -1,6 +1,5 @@
 package com.example.leafdoc.service;
 
-import com.example.leafdoc.DTO.scan.DiseaseInfo;
 import com.example.leafdoc.DTO.prediction.MlPredictResponse;
 import com.example.leafdoc.DTO.prediction.PredictionItem;
 import com.example.leafdoc.DTO.scan.ScanHistoryResponse;
@@ -21,6 +20,7 @@ import com.example.leafdoc.util.ImageFile;
 import com.example.leafdoc.util.StoragePathGenarator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -94,7 +93,7 @@ public class ScanService {
             scan = scanRepo.saveAndFlush(scan);
             persisted = true;
 
-            return ScanResponse.from(scan, disease, publicUrl);
+            return ScanResponse.from(scan, publicUrl);
 
         } catch (RuntimeException ex) {
 
@@ -110,6 +109,7 @@ public class ScanService {
             throw ex;
         }
     }
+
     // get scan history
     @Transactional(readOnly = true)
     public Page<ScanHistoryResponse> getScanHistory(
@@ -117,32 +117,36 @@ public class ScanService {
             Pageable pageable
     ) {
         return scanRepo
-                .findAllByUser_IdOrderByCreatedAtDesc(userId, pageable)
+                .findScanHistory(userId, pageable)
                 .map(ScanHistoryResponse::from);
     }
+
     // get scan details
     @Transactional(readOnly = true)
     public ScanResponse getScanDetails(
             Long scanId,
             Long userId
     ) {
-        Scan scan = scanRepo.findByIdAndUser_Id(scanId, userId)
+        Scan scan = scanRepo.findScanDetails(scanId, userId)
                 .orElseThrow(ResourceNotFoundException::new);
 
-        Disease disease = scan.getDisease();
+        if (scan.getDisease() != null) {      // initialize the lazy relations
+            Hibernate.initialize( scan.getDisease() );
+            Hibernate.initialize( scan.getDisease().getCrop() );
+        }
 
         return ScanResponse.from(
                 scan,
-                disease,
                 imageStorageClient.getPublicImageUrl(scan.getImagePath())
         );
 
     }
+
     // scan delete
     @Transactional
     public void deleteScan(Long scanId, Long userId) {
 
-        Scan scan = scanRepo.findByIdAndUser_Id(scanId, userId)
+        Scan scan = scanRepo.findScanDetails(scanId, userId)
                 .orElseThrow(ResourceNotFoundException::new);
 
         imageStorageClient.delete(scan.getImagePath());
