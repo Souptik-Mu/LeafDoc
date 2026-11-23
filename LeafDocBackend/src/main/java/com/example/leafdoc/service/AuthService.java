@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Base64;
@@ -41,8 +42,8 @@ public class AuthService {
     private final EmailService emailService;
     private final ObjectMapper objectMapper;
 
-    @Value("${app.cors.allowed-origin}")
-    private String frontendUrl;
+    @Value("${app.cors.allowed-origin}")  private String frontendUrl;
+    @Value("${app.token.expiration}")     private Duration tokenExpiry;
 
     private String generateRawToken() {
         byte[] bytes = new byte[32];
@@ -68,8 +69,7 @@ public class AuthService {
     //register
     public void register(String name,
                          String email,
-                         String password,
-                         Role role) {
+                         String password) {
 
         if (userRepo.existsByEmail(email))
             throw new InvalidCredentialsException(); // todo: 409 Conflict- implement later
@@ -84,12 +84,12 @@ public class AuthService {
                 name,
                 email,
                 passwordEncoder.encode(password),
-                role
+                Role.USER
         );
 
         token.setVerificationTokenHash( hashToken(rawToken) );
         token.setCreatedAt(now);
-        token.setExpiresAt(now.plus(15, ChronoUnit.MINUTES));
+        token.setExpiresAt(now.plus(tokenExpiry));
         token.setSerialisedData(
                 objectMapper.writeValueAsString(payload)
         );
@@ -175,7 +175,7 @@ public class AuthService {
 
         token.setVerificationTokenHash( hashToken(rawToken) );
         token.setCreatedAt(now);
-        token.setExpiresAt(now.plus(15, ChronoUnit.MINUTES));
+        token.setExpiresAt(now.plus(tokenExpiry));
         token.setSerialisedData(
                 objectMapper.writeValueAsString(payload)
         );

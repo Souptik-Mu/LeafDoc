@@ -27,7 +27,6 @@ public class AuthController {
     private final AuthService authService;
     @Value("${app.jwt.expiration}") private Duration tokenExpiry;
 
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest req) {
 
@@ -53,11 +52,11 @@ public class AuthController {
     public ResponseEntity<Void> register(
             @Valid @RequestBody RegisterRequest request) {
 
-        authService.register(request.name(), request.email(), request.password(),  request.role());
+        authService.register(request.name(), request.email(), request.password());
         return  ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    @GetMapping("/verify-email")
+    @PostMapping("/verify-email")
     public ResponseEntity<Void> verify(@RequestParam String token ) {
 
         String jwt = authService.verifyToken(token);
@@ -115,7 +114,7 @@ public class AuthController {
                 .body(user);
     }
 
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @AuthenticationPrincipal
             AuthenticatedUserPrincipal user
