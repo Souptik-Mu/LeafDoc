@@ -17,17 +17,18 @@ public record DiseaseInfo(
 ) {
 
     public static DiseaseInfo from(Disease disease) {
-
-        return new DiseaseInfo(
-                //disease.getCrop().getName(),
-                disease.getName(),
-                disease.getDescription(),
-                disease.getSymptoms(),
-                disease.getCauses(),
-                disease.getTreatment(),
-                disease.getPrevention(),
-                disease.getCareTips()
-                //disease.isHealthy()
-        );
+        return  (disease==null)
+                ? null
+                : new DiseaseInfo(
+                        //disease.getCrop().getName(),
+                        disease.getName(),
+                        disease.getDescription(),
+                        disease.getSymptoms(),
+                        disease.getCauses(),
+                        disease.getTreatment(),
+                        disease.getPrevention(),
+                        disease.getCareTips()
+                        //disease.isHealthy()
+                );
     }
 }

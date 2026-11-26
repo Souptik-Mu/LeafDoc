@@ -33,6 +33,6 @@ public class VerificationToken {
     private Instant expiresAt;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String serialisedData;  //Stores the registrationPayload after serialization.
+    private String serialisedData;  //Stores the TokenData after serialization.
 
 }

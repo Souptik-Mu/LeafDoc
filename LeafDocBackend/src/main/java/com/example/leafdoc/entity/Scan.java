@@ -46,6 +46,16 @@ public class Scan {
     )
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "disease_id",
+            foreignKey = @ForeignKey(name = "fk_scan_disease")
+    )
+    private Disease disease;
+
+    @Column(name = "title", nullable = false, length = 150)
+    private String title;
+
     @Column(
             name = "predicted_class_label",
             nullable = false,
