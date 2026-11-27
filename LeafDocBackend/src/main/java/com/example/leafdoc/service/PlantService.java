@@ -13,6 +13,7 @@ import com.example.leafdoc.repository.CropRepository;
 import com.example.leafdoc.repository.PlantImageRepository;
 import com.example.leafdoc.repository.PlantRepository;
 import com.example.leafdoc.util.ImageFile;
+import com.example.leafdoc.util.ImageValidator;
 import com.example.leafdoc.util.StoragePathGenarator;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class PlantService {
     private final PlantRepository plantRepo;
     private final PlantImageRepository plantImageRepo;
     private final CropRepository cropRepo;
+    private final ImageValidator imageValidator;
 
     public void createPlant(
             Long userId,
@@ -158,7 +160,7 @@ public class PlantService {
         Plant plant = plantRepo.findByIdAndUserId(userId, plantId)
                 .orElseThrow(ResourceNotFoundException::new);
 
-        ImageFile imageFile = new ImageFile(file);   /// auto validates
+        ImageFile imageFile = new ImageFile(file, imageValidator);   /// auto validates
 
         String objectPath = StoragePathGenarator.plantImage(userId, plantId, imageFile.getExtension());
         String publicUrl  =  imageStorageClient.upload(imageFile, objectPath);

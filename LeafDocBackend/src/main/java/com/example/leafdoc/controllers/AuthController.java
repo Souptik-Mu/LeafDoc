@@ -97,10 +97,9 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPass(
-            @AuthenticationPrincipal AuthenticatedUserPrincipal user,
             @Valid @RequestBody ResetPassRequest request
     ) {
-        authService.resetPassword(user.userId(), request.token(), request.newPassword());
+        authService.resetPassword(request.token(), request.newPassword());
         return  ResponseEntity.status(HttpStatus.OK).build();
     }
 

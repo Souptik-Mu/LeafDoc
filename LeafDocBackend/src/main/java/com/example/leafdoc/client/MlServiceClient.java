@@ -46,7 +46,7 @@ public class MlServiceClient {
 
         MultipartBodyBuilder body = new MultipartBodyBuilder();
 
-        body.part("file", image.file().getResource())
+        body.part("file", image.getFile().getResource())
                 .filename(image.getFileName()+"."+image.getExtension())
                 .contentType(
                         MediaType.parseMediaType(

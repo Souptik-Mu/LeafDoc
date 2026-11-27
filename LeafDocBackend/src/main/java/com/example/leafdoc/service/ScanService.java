@@ -17,6 +17,7 @@ import com.example.leafdoc.repository.PlantRepository;
 import com.example.leafdoc.repository.ScanRepository;
 import com.example.leafdoc.repository.UserRepository;
 import com.example.leafdoc.util.ImageFile;
+import com.example.leafdoc.util.ImageValidator;
 import com.example.leafdoc.util.StoragePathGenarator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class ScanService {
     private final DiseaseRepository diseaseRepo;
     private final MlServiceClient mlClient;
     private final ImageStorageClient imageStorageClient;
+    private final ImageValidator imageValidator;
 
     @Transactional
     public ScanResponse createScan(
@@ -54,7 +56,7 @@ public class ScanService {
                         "Authenticated user not found."
                 ));
 
-        ImageFile image = new ImageFile(file);  // auto validates the image, if anything goes south throws tantrum(Exception)
+        ImageFile image = new ImageFile(file, imageValidator);  // auto validates the image, if anything goes south throws tantrum(Exception)
 
         String path = StoragePathGenarator.scanImage(user.getId(),image.getExtension());
 
