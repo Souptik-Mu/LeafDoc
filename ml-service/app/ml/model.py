@@ -34,36 +34,11 @@ class PlantDiseaseModel:
 
         # Prepare image transformation
         self.transform = self._build_transform()
-
     def _load_classes(self) -> list[str]:
-            with open(self.classes_path, "r", encoding="utf-8") as file:
-                    classes = json.load(file)
-             if not classes:
-                      raise ValueError("No model classes found")
-              return classes
-
         with open(self.classes_path, "r", encoding="utf-8") as file:
             classes = json.load(file)
 
-        # Validate number of classes
-        if len(classes) != 23:
-            raise ValueError(
-                f"Expected 23 classes, found {len(classes)}"
-            )
-
-        # Check for duplicate classes
-        if len(set(classes)) != len(classes):
-            raise ValueError("Duplicate class names found")
-
-        # Validate class mappings
-        for class_name in classes:
-            if class_name not in self.CLASS_MAPPING:
-                raise ValueError(
-                    f"Missing class mapping: {class_name}"
-                )
-
         return classes
-
     def _load_model(self):
 
         model = models.mobilenet_v2(weights=None)
