@@ -1,4 +1,4 @@
-import uvicorn
+﻿import uvicorn
 import cv2 as cv
 from PIL import Image
 from fastapi import (
@@ -26,7 +26,7 @@ class Server:
             Exception,
             self._defaultExceptionHandler,
         )
-        
+
     def _configure_routes(self):
         self.app.add_api_route(
             "/ml/predict",
@@ -57,7 +57,7 @@ class Server:
                 "msg": str(exc),
             },
         )
-    
+
     @staticmethod
     def _validate_service_key(
         x_ml_service_key: str = Header(...),
@@ -67,7 +67,7 @@ class Server:
                 status_code=403,
                 detail="Unauthorized access",
             )
-        
+
     async def predict(
         self,
         file: UploadFile = File(...),
@@ -124,7 +124,7 @@ class Server:
                 status_code=400,
                 detail=str(exc),
             ) from exc
-        
+
     async def health(
         self,
         _: None = Depends(_validate_service_key),
@@ -134,14 +134,14 @@ class Server:
             "status": "Connected",
             "authentication": "Valid",
         }
-    
+
     async def get(self) -> dict[str,str]:
         return {
             "msg": "Hello from ml service.",
             "status": "Connected",
             "authorization": "unknown",
         }
-    
+
     def start(self) -> None:
         uvicorn.run(
             self.app,

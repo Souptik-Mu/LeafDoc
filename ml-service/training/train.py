@@ -30,17 +30,44 @@ MODEL_DIR = PROJECT_ROOT / "ml-service" / "models"
 # --------------------------------------------------
 
 CLASSES = [
-    "Tomato___healthy",
+    # Tomato - 10 classes
+    "Tomato___Bacterial_spot",
     "Tomato___Early_blight",
+    "Tomato___healthy",
     "Tomato___Late_blight",
     "Tomato___Leaf_Mold",
     "Tomato___Septoria_leaf_spot",
-    "Potato___healthy",
+    "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot",
+    "Tomato___Tomato_mosaic_virus",
+    "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+
+    # Potato - 3 classes
     "Potato___Early_blight",
+    "Potato___healthy",
     "Potato___Late_blight",
-    "Pepper,_bell___healthy",
+
+    # Bell Pepper - 2 classes
     "Pepper,_bell___Bacterial_spot",
+    "Pepper,_bell___healthy",
+
+    # Apple - 4 classes
+    "Apple___Apple_scab",
+    "Apple___Black_rot",
+    "Apple___Cedar_apple_rust",
+    "Apple___healthy",
+
+    # Peach - 2 classes
+    "Peach___Bacterial_spot",
+    "Peach___healthy",
+
+    # Soybean - 1 class
+    "Soybean___healthy",
+
+    # Orange - 1 class
+    "Orange___Haunglongbing_(Citrus_greening)",
 ]
+
 
 IMAGE_SIZE = 224
 BATCH_SIZE = 16
@@ -71,7 +98,6 @@ def main():
     print("Dataset path:", DATASET_DIR)
     print("Loading dataset...")
 
-    # Training transformations
     train_transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         transforms.RandomHorizontalFlip(),
@@ -82,7 +108,6 @@ def main():
         ),
     ])
 
-    # Validation transformations (no random augmentation)
     val_transform = transforms.Compose([
         transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
         transforms.ToTensor(),
@@ -92,7 +117,6 @@ def main():
         ),
     ])
 
-    # Load dataset separately with different transformations
     train_full_dataset = datasets.ImageFolder(
         root=str(DATASET_DIR),
         transform=train_transform,
@@ -114,13 +138,13 @@ def main():
             f"Missing dataset classes: {missing_classes}"
         )
 
-    # Map selected classes to output labels 0-9
+    # Map selected classes to output labels
     class_to_new_index = {
         class_name: index
         for index, class_name in enumerate(CLASSES)
     }
 
-    # Select images belonging to the 10 classes
+    # Select images belonging to selected classes
     selected_indices = [
         index
         for index, (_, original_label) in enumerate(
@@ -130,7 +154,7 @@ def main():
         in class_to_new_index
     ]
 
-    # Create labels in the new 0-9 order
+    # Create labels in the selected class order
     selected_labels = [
         class_to_new_index[
             train_full_dataset.classes[
@@ -140,10 +164,25 @@ def main():
         for index in selected_indices
     ]
 
+    print("Selected crops: 7")
     print("Selected classes:", len(CLASSES))
     print("Selected images:", len(selected_indices))
 
-    # Split indices while preserving class proportions
+    # Check that every class has enough images for stratification
+    class_counts = {
+        class_name: selected_labels.count(index)
+        for index, class_name in enumerate(CLASSES)
+    }
+
+    for class_name, count in class_counts.items():
+        print(f"{class_name}: {count} images")
+
+        if count < 2:
+            raise ValueError(
+                f"Not enough images for class: {class_name}"
+            )
+
+    # Split data while preserving class proportions
     train_indices, val_indices = train_test_split(
         list(range(len(selected_indices))),
         test_size=0.2,
@@ -204,14 +243,13 @@ def main():
     print("Loading pretrained MobileNetV2...")
 
     weights = models.MobileNet_V2_Weights.DEFAULT
-
     model = models.mobilenet_v2(weights=weights)
 
-    # Freeze pretrained feature-extraction layers
+    # Freeze pretrained feature extraction layers
     for parameter in model.features.parameters():
         parameter.requires_grad = False
 
-    # Replace classifier with 10 output classes
+    # Replace classifier with 23 output classes
     model.classifier[1] = nn.Linear(
         model.last_channel,
         len(CLASSES),
@@ -254,7 +292,6 @@ def main():
 
         average_loss = total_loss / len(train_dataset)
 
-        # Evaluate on validation data
         model.eval()
 
         correct = 0
@@ -284,7 +321,7 @@ def main():
             f"Validation accuracy: {accuracy:.2%}"
         )
 
-        # Save the best model weights
+        # Save best model weights
         if accuracy > best_accuracy:
             best_accuracy = accuracy
 

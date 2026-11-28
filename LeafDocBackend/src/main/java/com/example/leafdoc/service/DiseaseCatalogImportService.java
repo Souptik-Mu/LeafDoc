@@ -1,4 +1,4 @@
-package com.example.leafdoc.service;
+﻿package com.example.leafdoc.service;
 
 import com.example.leafdoc.DTO.catalog.CropCatalogEntry;
 import com.example.leafdoc.DTO.catalog.DiseaseCatalogDocument;
@@ -31,7 +31,7 @@ public class DiseaseCatalogImportService {
 
     @Transactional
     public void importCatalog(boolean updateExisting) {
-    
+
         DiseaseCatalogDocument catalog = readCatalog();
         Map<String, Crop> cropMap = importCrops(
                 catalog.crops(), updateExisting

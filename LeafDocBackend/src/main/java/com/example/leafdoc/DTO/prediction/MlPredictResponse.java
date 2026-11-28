@@ -9,4 +9,3 @@ public record MlPredictResponse(
         ModelInfo modelInfo
 ) {
 }
-

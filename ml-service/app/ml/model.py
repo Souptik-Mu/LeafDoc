@@ -1,16 +1,16 @@
+﻿import json
 from pathlib import Path
-
 import torch
 import torch.nn as nn
 from torchvision import models, transforms # type: ignore
 from PIL import Image
-from dto.types import PredictionItemDTO 
-
+from dto.types import PredictionItemDTO
 class PlantDiseaseModel:
-
     MODEL_NAME = "LeafDoc-MobileNetV2"
-    MODEL_VERSION = "1.0.0"
+    MODEL_VERSION = "2.0.0"
     INPUT_SIZE = 224
+
+    
 
     def __init__(self):
 
@@ -26,35 +26,43 @@ class PlantDiseaseModel:
             "cuda" if torch.cuda.is_available() else "cpu"
         )
 
+        # Load class names
         self.class_names = self._load_classes()
+
+        # Load trained model
         self.model = self._load_model()
+
+        # Prepare image transformation
         self.transform = self._build_transform()
-        
     def _load_classes(self) -> list[str]:
-        import json
-        with open(self.classes_path, encoding="utf-8") as file:
+        with open(self.classes_path, "r", encoding="utf-8") as file:
             classes = json.load(file)
-        if not classes:
-            raise ValueError("No model classes found")
+
         return classes
-    
     def _load_model(self):
+
         model = models.mobilenet_v2(weights=None)
+
         model.classifier[1] = nn.Linear(
             model.last_channel,
             len(self.class_names),
         )
+
+        # Load trained weights
         state = torch.load(
             self.model_path,
             map_location=self.device,
             weights_only=True,
         )
+
         model.load_state_dict(state)
         model.to(self.device)
         model.eval()
+
         return model
-    
+
     def _build_transform(self):
+
         return transforms.Compose([
             transforms.Resize(
                 (self.INPUT_SIZE, self.INPUT_SIZE)
@@ -68,33 +76,37 @@ class PlantDiseaseModel:
 
     @torch.inference_mode()
     def predict(self, image: Image.Image) -> list[PredictionItemDTO]:
+
         # Ensure the image has three color channels
         image = image.convert("RGB")
 
         # Preprocess image
-        image_tensor : torch.Tensor = self.transform(image).unsqueeze(0).to(self.device) # type: ignore
+        image_tensor: torch.Tensor = (
+            self.transform(image).unsqueeze(0).to(self.device)
+        )  # type: ignore
 
         # Run model prediction
-        #with torch.inference_mode(): # with decorator
-        outputs : torch.Tensor = self.model(image_tensor)
-        probabilities : torch.Tensor = torch.softmax(outputs, dim=1)
+        outputs: torch.Tensor = self.model(image_tensor)
+        probabilities: torch.Tensor = torch.softmax(outputs, dim=1)
 
         # Ensure probabilities are valid
         if not torch.isfinite(probabilities).all().item():
             raise RuntimeError("Invalid prediction probabilities")
 
         # Get top 3 predictions
-        top_values , top_indices = torch.topk(
+        top_values, top_indices = torch.topk(
             probabilities[0],
             k=min(3, len(self.class_names))
         )
-        scores: list[float] = top_values.tolist() # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
-        indices: list[int] = top_indices.tolist() # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
 
+        scores: list[float] = top_values.tolist()  # type: ignore
+        indices: list[int] = top_indices.tolist()  # type: ignore
+
+        # Return prediction results
         return [
             PredictionItemDTO(
-                classLabel= self.class_names[index],
-                confidenceScore= round(score, 4)
-            )for score, index in zip(scores, indices)
+                classLabel=self.class_names[index],
+                confidenceScore=round(score, 4)
+            )
+            for score, index in zip(scores, indices)
         ]
-
