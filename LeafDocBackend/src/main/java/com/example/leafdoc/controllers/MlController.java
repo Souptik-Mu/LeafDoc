@@ -3,6 +3,7 @@ package com.example.leafdoc.controllers;
 import com.example.leafdoc.DTO.prediction.MlPredictResponse;
 import com.example.leafdoc.client.MlServiceClient;
 import com.example.leafdoc.util.ImageFile;
+import com.example.leafdoc.util.ImageValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.util.Map;
 public class MlController {
 
     private final MlServiceClient mlServiceClient;
+    private final ImageValidator imageValidator;
 
     @PostMapping(
             value = "/predict",
@@ -25,7 +27,7 @@ public class MlController {
     public ResponseEntity<MlPredictResponse> predict(
             @RequestParam("file") MultipartFile file
     ) {
-        return ResponseEntity.ok().body(mlServiceClient.predict(new ImageFile(file)));
+        return ResponseEntity.ok().body(mlServiceClient.predict(new ImageFile(file, imageValidator)));
     }
     @GetMapping("/test")
     public ResponseEntity<Map<String, Object>> test() {

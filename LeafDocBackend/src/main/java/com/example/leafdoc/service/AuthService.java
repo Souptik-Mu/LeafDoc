@@ -197,7 +197,7 @@ public class AuthService {
     }
     //resetPass
     @Transactional
-    public void resetPassword(Long userId, String token, String newPassword) {
+    public void resetPassword(String token, String newPassword) {
         VerificationToken t = tokenRepo
                 .findByVerificationTokenHash(hashToken(token))
                 .orElseThrow(InvalidCredentialsException::new);
@@ -215,12 +215,15 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
 
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(InvalidCredentialsException::new);
+
         int updated = userRepo.updatePasswordHash( email, passwordEncoder.encode(newPassword) );
         if (updated != 1)
             throw new InvalidCredentialsException();
 
         tokenRepo.delete(t);
-        sessionService.revokeAllSessions(userId);
+        sessionService.revokeAllSessions(user.getId());
     }
 
     //logout

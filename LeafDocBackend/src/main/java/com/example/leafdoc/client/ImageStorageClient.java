@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriUtils;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Component
@@ -44,7 +45,7 @@ public class ImageStorageClient {
 
             return getPublicImageUrl(storePath);
 
-        } catch (RestClientException ex) {
+        } catch (RestClientException | IOException ex) {
             throw new ImageStorageException(
                     "An unexpected error occurred while uploading the image.",
                     ex

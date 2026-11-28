@@ -42,7 +42,7 @@ public class ScanController {
     @GetMapping
     public Page<ScanHistoryResponse> getHistory(
             @AuthenticationPrincipal AuthenticatedUserPrincipal user,
-            @PageableDefault(size = 10, sort = "createdAt",
+            @PageableDefault(size = 10, sort = "scannedAt",
                     direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
