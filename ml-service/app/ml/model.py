@@ -273,6 +273,11 @@ class PlantDiseaseModel:
         self.transform = self._build_transform()
 
     def _load_classes(self) -> list[str]:
+            with open(self.classes_path, "r", encoding="utf-8") as file:
+                    classes = json.load(file)
+             if not classes:
+                      raise ValueError("No model classes found")
+              return classes
 
         with open(self.classes_path, "r", encoding="utf-8") as file:
             classes = json.load(file)
