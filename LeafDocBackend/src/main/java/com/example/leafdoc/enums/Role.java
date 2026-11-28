@@ -1,7 +1,7 @@
 package com.example.leafdoc.enums;
 
 public enum Role {
-    GUEST,
+    //GUEST,
     USER, //Gardener
     ADMIN
 }
